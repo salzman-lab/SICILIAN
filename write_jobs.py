@@ -151,7 +151,7 @@ def main():
   single = True
   tenX = True
   stranded_library = True
-  bc_pattern = "C"*16 + "N"*10
+  bc_pattern = "C"*16 + "N"*12
 
 ## Toggles for deciding which steps in SICILIAN should be run
   run_whitelist = False

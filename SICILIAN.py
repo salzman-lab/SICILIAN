@@ -1,6 +1,4 @@
-# Wrapper script for STAR and statistical modeling
-# Created by Julia Olivieri
-# 17 June 2019
+# Wrapper script for running SICILIAN
 
 import glob
 import os
@@ -17,8 +15,7 @@ def sbatch_file(file_name,out_path, name, job_name, time, mem, command, dep="", 
   job_file.write("#SBATCH --output={}{}/log_files/{}.%j.out\n".format(out_path, name,job_name))
   job_file.write("#SBATCH --error={}{}/log_files/{}.%j.err\n".format(out_path, name,job_name))
   job_file.write("#SBATCH --time={}\n".format(time))
-  job_file.write("#SBATCH --account=horence\n")
-  job_file.write("#SBATCH --partition=nih_s10\n")
+  job_file.write("#SBATCH -p quake,owners\n")
   job_file.write("#SBATCH --nodes=1\n")
   job_file.write("#SBATCH --mem={}\n".format(mem)) 
   if dep != "":
@@ -38,7 +35,7 @@ def GLM(out_path, name, gtf_file, single, domain_file, exon_pickle_file, splice_
   else:
     command += " 0 "
   command += "{} {} {} ".format(domain_file, exon_pickle_file, splice_pickle_file)
-  sbatch_file("run_GLM.sh", out_path, name,"GLM_{}".format(name), "24:00:00", "200Gb", command, dep=dep)  # used 200Gb for CML 80Gb for others and 300 for 10x blood3 
+  sbatch_file("run_GLM.sh", out_path, name,"GLM_{}".format(name), "5:00:00", "100Gb", command, dep=dep)  # used 200Gb for CML 80Gb for others and 300 for 10x blood3 
   return submit_job("run_GLM.sh")
 
 def whitelist(data_path,out_path, name, bc_pattern, r_ends):
@@ -81,7 +78,7 @@ def class_input(out_path, name, gtf_file, annotator_file, tenX, single, stranded
     command += "--stranded_library "
   if not single:
     command += "--paired "
-  sbatch_file("run_class_input.sh", out_path, name,"class_input_{}".format(name), "48:00:00", "300Gb", command, dep=dep)  # 96:00:00, and 210 Gb for Lu, 100 for others
+  sbatch_file("run_class_input.sh", out_path, name,"class_input_{}".format(name), "12:00:00", "50Gb", command, dep=dep)  # 96:00:00, and 210 Gb for Lu, 100 for others
   return submit_job("run_class_input.sh")
 
 
@@ -104,34 +101,17 @@ def STAR_map(out_path, data_path, name, r_ends, gzip, single, gtf_file, tenX, st
       command += "--readFilesCommand zcat "
     command += "--twopassMode Basic "
     command += "--alignIntronMax 1000000 "
-    command += "--alignIntronMin 20 "
     command += "--outFileNamePrefix {}{}/{} ".format(out_path, name, i + 1)
     command += "--outSAMtype BAM Unsorted "
     command += "--chimSegmentMin 10 "
     command += "--outSAMattributes All "
-    command += "--chimOutType WithinBAM HardClip Junctions "
-    command += "--outFilterMultimapNmax 20 "
-    command += "--alignSJoverhangMin 8 "
-    command += "--outSJfilterOverhangMin 12 12 12 12 "
-    command += "--outSJfilterCountUniqueMin 1 1 1 1 "
-    command += "--outSJfilterCountTotalMin 1 1 1 1 "
-    command += "--outSJfilterDistToOtherSJmin 0 0 0 0 "
-    command += "--outFilterMismatchNmax 999 "
-    command += "--outFilterMismatchNoverReadLmax 0.04 "
-    command += "--alignMatesGapMax 1000000 "
-    command += "--scoreGapNoncan -4 "
-    command += "--scoreGapATAC -4 "
-    command += "--chimScoreJunctionNonGTAG 0 "
-    command += "--limitOutSJcollapsed 5000000 "
-    command += "--limitIObufferSize 250000000 "
+    command += "--chimOutType WithinBAM SoftClip Junctions "
     command += "--chimJunctionOverhangMin 10 "
-    command += "--alignSJstitchMismatchNmax -1 -1 -1 -1 "
     command += "--chimSegmentReadGapMax 0"
     command += "--quantMode GeneCounts "
-    command += "--limitSjdbInsertNsj 2600000 "
     command += "--sjdbGTFfile {} ".format(gtf_file)
     command += "--outReadsUnmapped Fastx \n\n"
-  sbatch_file("run_map.sh", out_path, name,"map_{}".format(name), "48:00:00", "60Gb", command, dep = dep)
+  sbatch_file("run_map.sh", out_path, name,"map_{}".format(name), "24:00:00", "60Gb", command, dep = dep)
   return submit_job("run_map.sh")
 
 
@@ -145,40 +125,38 @@ def submit_job(file_name):
     print("Error submitting job {} {} {}".format(status, job_num, file_name))
 
 def main():
- 
-  parser = argparse.ArgumentParser()
-  parser.add_argument('-s', '--directory', required=True, help='the name of the 10x sample')
-  args = parser.parse_args()
 
-
-## Input arguments that should be fixed
-  sample = args.directory
-  print("input sample".format(sample))
-  data_path = "/oak/stanford/groups/krasnow/ktrav/COVID/data10x/sequencing_runs/200603_A00111_0499_BH7WTJDSXY/fastqs/"
-  out_dir = "/oak/stanford/groups/horence/Roozbeh/single_cell_project/output/"
-  run_name = "Krasnow_COVID_10x_pilot3"
+################################################################################# 
+#################################################################################
+################## Input arguments that should be fixed  ########################
+  data_path = "/scratch/PI/horence/Roozbeh/single_cell_project/data/TSP2_NovaSeq_Rerun/"
+  out_dir = "/scratch/PI/horence/Roozbeh/single_cell_project/output"
+  run_name = "test"
   r_ends = ["_R1_001.fastq.gz", "_R2_001.fastq.gz"]
-  names = [sample]
+  names = ["TSP2_Bladder_NA_10X_1_1_S5_L003"]
   star_path = "/oak/stanford/groups/horence/Roozbeh/single_cell_project/STAR-2.7.3a/bin/Linux_x86_64/STAR"
-  star_ref_path = "/oak/stanford/groups/horence/Roozbeh/single_cell_project/STAR-2.7.1a/gencode-vH29.SARS-CoV-2_WA1_index_2.7.1a"
-  gtf_file = "/oak/stanford/groups/krasnow/ktrav/COVID/data10x/sequencing_runs/200528_A00111_0493_BHLJ7KDRXX/gencode-vH29.SARS-CoV-2_WA1.gtf"
-  annotator_file = "/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/STAR_wrapper/annotators/gencode-vH29.SARS-CoV-2_WA1.pkl"
-  exon_pickle_file = "/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/STAR_wrapper/annotators/gencode-vH29.SARS-CoV-2_WA1_exon_bounds.pkl"
+  star_ref_path = "/oak/stanford/groups/horence/Roozbeh/single_cell_project/STAR-2.7.1a/hg38_index_2.7.1a"
+  gtf_file = "/oak/stanford/groups/horence/circularRNApipeline_Cluster/index/grch38_known_genes.gtf"
+  annotator_file = "/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/STAR_wrapper/annotators/hg38.pkl"
+  exon_pickle_file = "/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/STAR_wrapper/annotators/hg38_RefSeq_exon_bounds.pkl"
   splice_pickle_file = "/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/STAR_wrapper/annotators/hg38_RefSeq_splices.pkl"
   domain_file = "/oak/stanford/groups/horence/Roozbeh/single_cell_project/utility_files/ucscGenePfam.txt"
   single = True
   tenX = True
   stranded_library = True
   bc_pattern = "C"*16 + "N"*12
+#################################################################################
+#################################################################################
+#################################################################################
 
 ## Toggles for deciding which steps in SICILIAN should be run
   run_whitelist = False
   run_extract = False
-  run_map = True
+  run_map = False
   run_class = True
   run_GLM = True
  
-  out_path = out_dir + "{}/".format(run_name)
+  out_path = out_dir + "/{}/".format(run_name)
 
   if not tenX:
     run_whitelist = False

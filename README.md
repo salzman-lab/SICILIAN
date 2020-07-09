@@ -1,7 +1,4 @@
-# STAR wrapper
-Created 19 June 2019
-
-Last updated 9 April 2020
+# SICILIAN
 
 
 This project aligns fastq files to the genome using STAR, concatenates the `SJ.out.tab` and `Chimeric.out.junction` outputs into one file, and creates a class input file based on the STAR output.
@@ -390,4 +387,3 @@ For the processed files:
 `none_ann_known_gene`: `none_ann` is TRUE and `geneR1A_uniq` is NOT unknown or blank
 
 `none_ann_unknown_gene`: `none_ann` is TRUE and `geneR1A_uniq` IS unknown or blank
-# SICILIAN

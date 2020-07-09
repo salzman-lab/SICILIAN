@@ -5,7 +5,7 @@ This project aligns fastq files to the genome using STAR, concatenates the `SJ.o
 
 ## How to run the script
 
-The script `write_jobs.py` is the main wrapper that runs all necessary jobs. To run on a sample, edit the following variables in the main function:
+The script `SICILIAN.py` is the main wrapper that runs all necessary jobs. To run on a sample, edit the following variables in the Inputs section:
 
 ### Inputting sample data
 Update the script with information about your sample by inputting the following parameters.

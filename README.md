@@ -5,7 +5,7 @@ This project aligns fastq files to the genome using STAR, concatenates the `SJ.o
 
 ## How to run the script
 
-The script `write_jobs.py` is the main wrapper that runs all necessary jobs. To run on a sample, edit the following variables in the main function:
+The script `SICILIAN.py` is the main wrapper that runs all necessary jobs. To run on a sample, edit the following variables in the Inputs section:
 
 ### Inputting sample data
 Update the script with information about your sample by inputting the following parameters.
@@ -359,12 +359,6 @@ Also, the following 4 files will be written at the end of this module:
 
 ### Log files
 There is a file called `wrapper.log` in the folder for every pipeline run, as well as for every sample. The goal of these files it to make it easier to look at the output from the jobs you submit with the pipeline by collecting it all in the same place. For example, the folder `output/GSE109774_colon_cSM_10_cJOM_10_aSJMN_0_cSRGM_0` will contain a `wrapper.log` file which has the `.out` and `.err` files concatenated for every job and every sample in that run; these outputs are sorted by job type (so the outputs for the mapping jobs for each sample will be next to each other, etc). There is also a `wrapper.log` file in each sample sub-folder; for example, `output/GSE109774_colon_cSM_10_cJOM_10_aSJMN_0_cSRGM_0/SRR6546273` will contain this file. It contains the output for all `.out` and `.err` outputs from all the jobs run on that specific sample. The `wrapper.log` files are rewritten every time the pipeline is run on a sample.
-
-## A note on annotation
-
-## Decisions to make in the future
-
-Should our pipeline be based on independent alignment of both reads, or alignment in the paired-end read mode? This will depend on which is better for detecting junctions.
 
 ## Processed Files annotation columns
 

@@ -417,12 +417,12 @@ def split_cigar_align(cigar, fill_char = np.nan):
 
 def split_cigar_chim(cigar):
     matches = re.findall(r'(\d+)([A-Z]{1})', cigar)
-    if (matches[0][1] == "S") and (matches[-1][1] != "S"):
+    if (matches[0][1] in ["S","H"]) and (not(matches[-1][1] in ["S","H"])):
       cigar1 = "".join(["".join(m) for m in matches[1:]])
-    elif (matches[-1][1] == "S") and (matches[0][1] != "S"):
+    elif (matches[-1][1] in ["S","H"]) and (not(matches[0][1] in ["S","H"])):
       cigar1 = "".join(["".join(m) for m in matches[:-1]])
     else:
-      assert (matches[0][1] == "S") and (matches[-1][1] == "S")
+      assert (matches[0][1] in ["S","H"]) and (matches[-1][1] in ["S","H"])
       if int(matches[0][0]) > int(matches[-1][0]):
         cigar1 = "".join(["".join(m) for m in matches[1:]])
       else:

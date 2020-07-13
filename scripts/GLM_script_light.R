@@ -624,6 +624,12 @@ if (nrow(class_input[fileTypeR1=="Chimeric"])>0){
   ################################################################
   ######## Building the GLMnet for chimeric junctions ############
   ################################################################
+  if (is.SE == 0){
+    regression_formula = as.formula("train_class ~ overlap_R1 * max_overlap_R1  + nmmR1 + length_adj_AS_R1A + length_adj_AS_R1B + nmmR2 + entropyR1*entropyR2 + length_adj_AS_R2")
+  } else{
+    regression_formula = as.formula("train_class ~ overlap_R1 * max_overlap_R1  + nmmR1 + length_adj_AS_R1A + length_adj_AS_R1B + entropyR1")
+  }
+
   tic("Two-step GLMnet constrained")
   print("Two-step GLMnet constrained")
   x_glmnet = model.matrix(regression_formula, class_input[!is.na(train_class)])

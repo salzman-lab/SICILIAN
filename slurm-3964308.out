@@ -1,0 +1,100 @@
+/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/SICILIAN_final_workflow/scripts/light_utils.py:33: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  CI_new["geneR1A"] = CI_new["geneR1A"].fillna("")
+/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/SICILIAN_final_workflow/scripts/light_utils.py:34: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  CI_new["geneR1B"] = CI_new["geneR1B"].fillna("")
+/home/users/rdehghan/.local/lib/python3.6/site-packages/pandas/core/indexing.py:543: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  self.obj[item] = s
+/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/SICILIAN_final_workflow/scripts/light_utils.py:38: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  CI_new["gene_strandR1A"] = CI_new["refName_ABR1"].str.split("|").str[0].str.split(":").str[-1]
+/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/SICILIAN_final_workflow/scripts/light_utils.py:39: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  CI_new["gene_strandR1B"] = CI_new["refName_ABR1"].str.split("|").str[1].str.split(":").str[-1]
+/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/SICILIAN_final_workflow/scripts/light_utils.py:40: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  CI_new["numgeneR1A"] = CI_new["geneR1A"].str.split(",").str.len()#.astype("Int32") # the number of overlapping genes on the R1A side
+/home/users/rdehghan/.local/lib/python3.6/site-packages/pandas/core/frame.py:3391: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  self[k1] = value[k2]
+/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/SICILIAN_final_workflow/scripts/light_utils.py:42: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  CI_new["numgeneR1B"] = CI_new["geneR1B"].str.split(",").str.len()#.astype("Int32") # the number of overlapping genes on the R1B side
+/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/SICILIAN_final_workflow/scripts/light_utils.py:52: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  CI_new["shared_gene"] = [",".join([x for x in a.split(",") if x in b.split(",")]) for a,b in zip(CI_new["geneR1A"],CI_new["geneR1B"])]
+/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/SICILIAN_final_workflow/scripts/light_utils.py:55: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  CI_new["num_shared_genes"] = CI_new["shared_gene"].str.split(",").str.len()
+/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/SICILIAN_final_workflow/scripts/light_utils.py:61: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  CI_new["geneR1A_uniq"] = CI_new["geneR1A"]
+/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/SICILIAN_final_workflow/scripts/light_utils.py:62: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
+  CI_new["geneR1B_uniq"] = CI_new["geneR1B"]
+bam_files ['/oak/stanford/groups/horence/Roozbeh/single_cell_project/output/Stanford_covid_data/RR060e_00310_N12_S190/1Aligned.out.bam', '/oak/stanford/groups/horence/Roozbeh/single_cell_project/output/Stanford_covid_data/RR060e_00310_N12_S190/2Aligned.out.bam']
+bam_files ['/oak/stanford/groups/horence/Roozbeh/single_cell_project/output/Stanford_covid_data/RR060e_00310_N12_S190/1Aligned.out.bam', '/oak/stanford/groups/horence/Roozbeh/single_cell_project/output/Stanford_covid_data/RR060e_00310_N12_S190/2Aligned.out.bam']
+started modify 151.12173867225647
+ended modify 265.5276710987091
+bam_files ['/oak/stanford/groups/horence/Roozbeh/single_cell_project/output/Stanford_covid_data/RR060e_00310_N12_S190/2Aligned.out.bam', '/oak/stanford/groups/horence/Roozbeh/single_cell_project/output/Stanford_covid_data/RR060e_00310_N12_S190/1Aligned.out.bam']
+started modify 600.1860611438751
+ended modify 727.2460289001465
+Traceback (most recent call last):
+  File "scripts/light_class_input.py", line 312, in <module>
+    main()
+  File "scripts/light_class_input.py", line 300, in main
+    pd.concat(final_dfs,axis=0).reset_index(drop=True).to_parquet(args.outpath + "class_input.pq")
+  File "/home/users/rdehghan/.local/lib/python3.6/site-packages/pandas/core/frame.py", line 2203, in to_parquet
+    partition_cols=partition_cols, **kwargs)
+  File "/home/users/rdehghan/.local/lib/python3.6/site-packages/pandas/io/parquet.py", line 252, in to_parquet
+    partition_cols=partition_cols, **kwargs)
+  File "/home/users/rdehghan/.local/lib/python3.6/site-packages/pandas/io/parquet.py", line 113, in write
+    table = self.api.Table.from_pandas(df, **from_pandas_kwargs)
+  File "pyarrow/table.pxi", line 1177, in pyarrow.lib.Table.from_pandas
+  File "/home/users/rdehghan/.local/lib/python3.6/site-packages/pyarrow/pandas_compat.py", line 575, in dataframe_to_arrays
+    for c, f in zip(columns_to_convert, convert_fields)]
+  File "/home/users/rdehghan/.local/lib/python3.6/site-packages/pyarrow/pandas_compat.py", line 575, in <listcomp>
+    for c, f in zip(columns_to_convert, convert_fields)]
+  File "/home/users/rdehghan/.local/lib/python3.6/site-packages/pyarrow/pandas_compat.py", line 560, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow/array.pxi", line 265, in pyarrow.lib.array
+  File "pyarrow/array.pxi", line 80, in pyarrow.lib._ndarray_to_array
+TypeError: an integer is required (got type str)

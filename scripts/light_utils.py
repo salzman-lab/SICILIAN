@@ -225,7 +225,7 @@ def get_loc_flag(row):
       return 1
     else:
       return 0
-  return "error"
+  return -1
 
 def parse_cigar(cigar):
   matches = re.findall(r'(\d+)([A-Z]{1})', cigar)

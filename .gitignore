@@ -7,3 +7,6 @@ test*
 Lemur_*
 HLCA*
 Krasnow*
+*txt
+*tsv
+slurm*

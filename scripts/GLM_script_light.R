@@ -442,7 +442,7 @@ class_input[, geneR1B_uniq:=strsplit(refName_newR1, split = ":", fixed = TRUE)[[
 toc()
 
 ## add ensembl ids
-class_input = add_ensembl(gtf_file,directory,class_input,is.SE)
+#class_input = add_ensembl(gtf_file,directory,class_input,is.SE)
 
 class_input[fileTypeR1 == "Chimeric",is.STAR_Chim := ""]
 class_input[fileTypeR1 == "Aligned",is.STAR_SJ := ""]

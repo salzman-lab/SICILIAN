@@ -107,7 +107,7 @@ def STAR_map(out_path, data_path, name, r_ends, gzip, single, gtf_file, tenX, st
     command += "--outSAMattributes All "
     command += "--chimOutType WithinBAM SoftClip Junctions "
     command += "--chimJunctionOverhangMin 10 "
-    command += "--chimSegmentReadGapMax 0"
+    command += "--chimSegmentReadGapMax 0 "
     command += "--quantMode GeneCounts "
     command += "--sjdbGTFfile {} ".format(gtf_file)
     command += "--outReadsUnmapped Fastx \n\n"

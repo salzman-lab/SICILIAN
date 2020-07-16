@@ -5,13 +5,22 @@ SICILIAN is a statistical method for identifying RNA splice junctions using alig
 
 ## How to run SICILIAN
 There are two options for running SICILIAN
-1- using the ready-to-run cloud-based online tool with CWL implementation without the need for preinstallations on the cancer genomics cloud platform.
-2- Downloading SICILIAN scripts to a local high performance computing (HPC) cluster and running SICILIAN after installing required libraries. 
+1. using the ready-to-run cloud-based online tool with CWL implementation without the need for preinstallations on the cancer genomics cloud platform.
+2. Downloading SICILIAN scripts to a local high performance computing (HPC) cluster and running SICILIAN after installing required libraries. 
 
 ## Online cloud-based tool for SICILIAN
-
 The cloud-based computational workflow for SICILIAN has been implemented on the Seven Bridges Cancer Genomics Cloud platform sponsored by the National Cancer Institute. The workflow is fully dockerized and has a user-friendly interface, which facilitates running SICILIAN even for users with little bioinformatics expertise. User only needs to upload his/her own RNA-Seq fastq files or use RNA-Seq files publicly-available on CGC (i.e., TCGA, CCLE, TARGET, ...) to run SICILIAN and selects correct annotation and index files to run SICILIAN. The online tool can be accessed via: https://cgc.sbgenomics.com/u/anaDsbg/sicilian-dev/ 
 
+## Running SICILIAN scripts on a local cluster
+### Software requirements 
+- Python 3.6.1
+ -
+- R 3.6.1
+
+Download the latest version of SICILIAN codesby cloning its github repository 
+```
+git clone https://github.com/salzmanlab/SICILIAN.git
+```
 The script `SICILIAN.py` is the main wrapper that runs all necessary jobs. To run on a sample, edit the following variables in the Inputs section:
 
 ### Inputting sample data

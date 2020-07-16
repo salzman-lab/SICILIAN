@@ -45,6 +45,21 @@ git clone https://github.com/salzmanlab/SICILIAN.git
   - GenomicAlignments
   (R scripts in SICILIAN automatically check to see if an R library is already installed and then install those that are needed. So no need for manual preinstallation!) 
   
+### Building annotator and index files
+SICLIAN uses STAR as the aligner and therefore STAR index files need to be input to SICILIAN. STAR index files can be built using the following command:
+```
+STAR --runThreadN 4 --runMode genomeGenerate --genomeDir Genome_data/star --genomeFastaFiles fasta_file.fa --sjdbGTFfile gtf_file.gtf
+```
+SICILIAN also needs annotator pickle files for pulling gene names and adding them to the detected junction based on their coordinates. Annotator pickle file need to be made once for an annotation GTF file using `create_annotator.py` script in the SICILIAN directory. The annotator pickle file can be built with the following command:
+```
+python3 create_annotator.py -g gtf_file.gtf -a annotation_name
+```
+`annotation_name` can be set to any arbitrary name but we recommended that it contains the name and version of the annotation (i.e., `hg38_gencode_v33`).    
+After running the above command,`create_annotator.py` will create 3 different pickle files: `annotation_name.pkl`, `annotation_name_exon_bounds.pkl`, and `annotation_name_splices.pkl`. 
+
+  
+  
+  
 
 
 

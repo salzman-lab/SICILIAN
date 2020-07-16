@@ -12,6 +12,14 @@ There are two options for running SICILIAN
 The cloud-based computational workflow for SICILIAN has been implemented on the Seven Bridges Cancer Genomics Cloud platform sponsored by the National Cancer Institute. The workflow is fully dockerized and has a user-friendly interface, which facilitates running SICILIAN even for users with little bioinformatics expertise. User only needs to upload his/her own RNA-Seq fastq files or use RNA-Seq files publicly-available on CGC (i.e., TCGA, CCLE, TARGET, ...) to run SICILIAN and selects correct annotation and index files to run SICILIAN. The online tool can be accessed via: https://cgc.sbgenomics.com/u/anaDsbg/sicilian-dev/ 
 
 ## Running SICILIAN scripts on a local cluster
+
+- Download the latest version of SICILIAN codes by cloning its github repository 
+```
+git clone https://github.com/salzmanlab/SICILIAN.git
+```
+- Intall needed packages for `R` and `Python`
+- Build annotation pickle files and STAR index files for a genome assembly and annotation using `create_annotator.py` script
+- Set the input variables in `SICILIAN.py` which is the main script that submits all necessary jobs for running SICILIAN on input RNA-Seq data. 
 ### Software requirements 
 - SICILIAN has been developed using `Python 3.6.1` and the following libraries are needed to be installed
   - argparse
@@ -38,11 +46,8 @@ The cloud-based computational workflow for SICILIAN has been implemented on the 
   (R scripts in SICILIAN automatically check to see if an R library is already installed and then install those that are needed. So no need for manual preinstallation!) 
   
 
-Download the latest version of SICILIAN codesby cloning its github repository 
-```
-git clone https://github.com/salzmanlab/SICILIAN.git
-```
-The script `SICILIAN.py` is the main wrapper that runs all necessary jobs. To run on a sample, edit the following variables in the Inputs section:
+
+
 
 ### Inputting sample data
 Update the script with information about your sample by inputting the following parameters.

@@ -13,7 +13,7 @@ The cloud-based computational workflow for SICILIAN has been implemented on the 
 
 ## Running SICILIAN scripts on a local cluster
 ### Software requirements 
-- Python 3.6.1
+- SICILIAN has been developed using `Python 3.6.1` and the following libraries are needed to be installed
   - argparse
   - collections
   - datetime
@@ -28,7 +28,15 @@ The cloud-based computational workflow for SICILIAN has been implemented on the 
   - time
   - sys
 
-- R 3.6.1
+- SICILIAN has been developed with `R 3.6.1` and needs the following packages are needed to be installed in `R`:
+  - data.table
+  - glmnet
+  - tictoc
+  - dplyr
+  - stringr
+  - GenomicAlignments
+  (R scripts in SICILIAN automatically check to see if an R library is already installed and then install those that are needed. So no need for manual preinstallation!) 
+  
 
 Download the latest version of SICILIAN codesby cloning its github repository 
 ```

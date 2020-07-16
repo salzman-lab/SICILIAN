@@ -14,7 +14,20 @@ The cloud-based computational workflow for SICILIAN has been implemented on the 
 ## Running SICILIAN scripts on a local cluster
 ### Software requirements 
 - Python 3.6.1
-  - afasdas
+  - argparse
+  - collections
+  - datetime
+  - math
+  - numpy
+  - os
+  - pandas
+  - pyarrow
+  - pickle
+  - pysam
+  - re
+  - time
+  - sys
+
 - R 3.6.1
 
 Download the latest version of SICILIAN codesby cloning its github repository 

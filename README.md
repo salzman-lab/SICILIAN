@@ -56,16 +56,11 @@ python3 create_annotator.py -g gtf_file.gtf -a annotation_name
 ```
 `annotation_name` can be set to any arbitrary name but we recommended that it contains the name and version of the annotation (i.e., `hg38_gencode_v33`).    
 After running the above command,`create_annotator.py` will create 3 different pickle files: `annotation_name.pkl`, `annotation_name_exon_bounds.pkl`, and `annotation_name_splices.pkl`. 
-
-  
-  
-  
-
-
-
-
-### Inputting sample data
-Update the script with information about your sample by inputting the following parameters.
+-`annotation_name.pkl`: is a required input for SICILIAN and is used to add gene names to junction ids
+-`annotation_name_exon_bounds.pkl`: is an optional input for SICILIAN and is used to determine whether or not the splice sites in a junction are annotated exon boundaries
+-`annotation_name_splices.pkl`: is an optional input for SICILIAN and is used to determine whether or not the splice site is annotated in the annotation file
+### Input parameters for SICILIAN:
+Update the input parameters in `SICILIAN.py` script with information about your sample, genome assembly and annotations, and STAR alignment.
 * `data_path`: set equal to the path containing the fastqs. Example: `data_path = "/scratch/PI/horence/JuliaO/single_cell/data/SRA/19.05.31.GSE109774/"`
 * `assembly`: set equal to the keyword for the genome assembly you want to use (maybe "mm10" for mouse assembly 10, or hg38 for human assembly 38). Example: `assembly = "mm10"`
 * `gtf_file`: The path to the gtf file that should be used to annotate genes. Example: `gtf_file = "/share/PI/horence/circularRNApipeline_Cluster/index/mm10_genes.gtf"`
@@ -104,7 +99,7 @@ There will be a separate folder for every combination of STAR parameters that wa
 Based on the parameters we are running with, this includes  `2Aligned.out.sam`, `2Chimeric.out.sam`, `2Chimeric.out.junction`, `2SJ.out.tab`, and the same files with 1 instead of 2 if the reads are paired-end (among other STAR-generated files).
 
 ### Concatenated STAR splice files
-The created files are called `1SJ_Chimeric.out` (if the data is paired-end) and `2SJ_Chimeric.out`. Each of these concatenates the respective `SJ.out.tab` and `Chimeric.out.junction` files, and adds columns for the gene names of the donor and acceptor as well as their strands (because we are defining strand to be whatever strand the gene is on, and `?` if there is no gene on either strand or a gene on both strands). However, these two files don't have the same columns, so right now the only columns that are shared are "donor_chromosome", "acceptor_chromosome", "donor_gene", and "acceptor_gene". The rest of the columns from the individual file are still present, but they are left blank for rows that belong to the "other" file. A more complete description of the columns can be found in the STAR manual: http://chagall.med.cornell.edu/RNASEQcourse/STARmanual.pdf
+The created files are called `1SJ_Chimeric.out` (if the data is paired-end) and `2SJ_Chimeric.out`. Each of these concatenates the respective `SJ.out.tab` and `Chimeric.out.junction` files, and adds columns for the gene names of the donor and acceptor as well as their strands (because we are defining strand to be whatever strand the gene is on, and `?` if there is no gene on either strand or a gene on both strands). However, these two files don't have the same columns, so right now the only columns that are shared are "donor_chromosome", "acceptor_chromosome", "donor_gene", and "acceptor_gene". The rest of the columns from the individual file are still present, but they are left blank for rows that belong to the "other" file. A more complete description of the columns can be found in the STAR manual: https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
 
 ### Class input file
 The purpose of the class input files is for each row to contain a summary of read 1 and read 2 for every read where read 1 is either Chimeric or contains a gap. 

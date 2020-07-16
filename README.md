@@ -56,9 +56,9 @@ python3 create_annotator.py -g gtf_file.gtf -a annotation_name
 ```
 `annotation_name` can be set to any arbitrary name but we recommended that it contains the name and version of the annotation (i.e., `hg38_gencode_v33`).    
 After running the above command,`create_annotator.py` will create 3 different pickle files: `annotation_name.pkl`, `annotation_name_exon_bounds.pkl`, and `annotation_name_splices.pkl`. 
--`annotation_name.pkl`: is a required input for SICILIAN and is used to add gene names to junction ids
--`annotation_name_exon_bounds.pkl`: is an optional input for SICILIAN and is used to determine whether or not the splice sites in a junction are annotated exon boundaries
--`annotation_name_splices.pkl`: is an optional input for SICILIAN and is used to determine whether or not the splice site is annotated in the annotation file
+- `annotation_name.pkl`: is a required input for SICILIAN and is used to add gene names to junction ids
+- `annotation_name_exon_bounds.pkl`: is an optional input for SICILIAN and is used to determine whether or not the splice sites in a junction are annotated exon boundaries
+- `annotation_name_splices.pkl`: is an optional input for SICILIAN and is used to determine whether or not the splice site is annotated in the annotation file
 ### Input parameters for SICILIAN:
 Update the input parameters in `SICILIAN.py` script with information about your sample, genome assembly and annotations, and STAR alignment.
 * `data_path`: set equal to the path containing the fastqs. Example: `data_path = "/scratch/PI/horence/JuliaO/single_cell/data/SRA/19.05.31.GSE109774/"`

@@ -20,6 +20,7 @@ git clone https://github.com/salzmanlab/SICILIAN.git
 - Intall needed packages for `R` and `Python`
 - Build annotation pickle files and STAR index files for a genome assembly and annotation using `create_annotator.py` script
 - Set the input variables in `SICILIAN.py` which is the main script that submits all necessary jobs for running SICILIAN on input RNA-Seq data. 
+- For running SICILIAN on 10x scRNA-Seq data, it needs to first demultiplex 10x fastq file based on cell barcode and UMI information stored in R1. For 10x analysis, SICILIAN executes `whitelise` and `extract` commands from `UMI_tools` software. Therefore, `UMI_tools` should be preinstalled on the local cluster for running SICILIAN on 10x samples.  
 ### Software requirements 
 - SICILIAN has been developed using `Python 3.6.1` and the following libraries are needed to be installed
   - argparse
@@ -61,35 +62,33 @@ After running the above command,`create_annotator.py` will create 3 different pi
 - `annotation_name_splices.pkl`: is an optional input for SICILIAN and is used to determine whether or not the splice site is annotated in the annotation file
 ### Input parameters for SICILIAN:
 Update the input parameters in `SICILIAN.py` script with information about your sample, genome assembly and annotations, and STAR alignment.
-* `data_path`: set equal to the path containing the fastqs. Example: `data_path = "/scratch/PI/horence/JuliaO/single_cell/data/SRA/19.05.31.GSE109774/"`
-* `assembly`: set equal to the keyword for the genome assembly you want to use (maybe "mm10" for mouse assembly 10, or hg38 for human assembly 38). Example: `assembly = "mm10"`
-* `gtf_file`: The path to the gtf file that should be used to annotate genes. Example: `gtf_file = "/share/PI/horence/circularRNApipeline_Cluster/index/mm10_genes.gtf"`
-* `run_name`: The unique name you want to give to the current run. It can be useful to include the date and a signifier for the data. Example: `run_name = "GSE109774_colon"`
-* `r_ends`: list of unique endings for the file names of read one (location 0) and read 2 (location 1). Example: `r_ends = ["_1.fastq.gz", "_2.fastq.gz"]`
-* `names`: list of unique identifiers for each fastq; e.g. file location for read 1 should be <data_path><name><r_ends[0]> and file location for read 2 should be <data_path><name><r_ends[1]>. Example: `names = ["SRR65462{}".format(i) for i in range(73,74)]`
-* `single`: Set equal to True if the data is single-end, and False if it is paired-end. Note that currently if `single = True` it is assumed that the single read to be aligned is in the second fastq file (because of the tendancy for droplet protocols to have read 1 contain the barcode and UMI and read 2 contain the sequence that aligns to the genome). This also causes the files to be demultiplexed to create a new fastq file before they're mapped.
-    
+* `data_path`: specifies path to the directory that contains the fastq files for the input RNA-Seq data.
+* `names`: specifies the name of the fastq file for the input RNA-Seq data (without suffix)  
+* `r_ends`: list of unique endings for the file names of R1 and R2 fastq files. Example: `r_ends = ["_1.fastq.gz", "_2.fastq.gz"]`
+* `run_name`: folder name for the SICILIAN output files.
+* `star_path`: the path to the STAR executable file
+* `star_ref_path`: the path to the STAR index files 
+* `gtf_file`: the path to the GTF file used as the reference annotation file for the genome assembly.
+* `annotator_file`: the path to the `annotation_name.pkl` file
+* `exon_pickle_file`: the path to the `annotation_name_exon_bounds.pkl` file (this is an OPTIONAL input)
+* `splice_pickle_file`: the path to the `annotation_name_splices.pkl` file (this is an OPTIONAL input)
+* `domain_file`: the path to the reference file for annotated protein domains downloaded from UCSC used for finding missing and inserted protein domains in the splice junction (this is an OPTIONAL input)    
+* `single`: set equal to `True` if the data is single-end, and `False` if it is paired-end. Note that currently if `single = True` it is assumed that the single read to be aligned is in the second fastq file (because of the tendancy of SICILIAN for droplet (10x) single-cell protocols in which `R1` contains the cell barcode and UMI information and R2 contains the actual cDNA information). This also causes the files to be demultiplexed to create a new fastq file before they're mapped.
+* `tenX`: set equal to `True` if the input RNA-Seq data is 10x and `False` otherwise.
+* `stranded_library`: set equal to `True` if input RNA-Seq data is based on a stranded library and `False` otherwise. (for stranded libraries such as 10x, `stranded_library` should be set to `True`). When `stranded_library` is set to `True`, strand orientations from the alignment bam file will be used as the strand orientation of the junction. For unstranded libraries, SICILIAN uses gene strand information from the GTF file as the read strand is ambiguous.  
+* `bc_pattern`: this parameter is needed only for 10x data and determines the barcode/UMI pattern in R1. For V3 chemistry in which UMI has 12 bps, `bc_pattern` should be set to `"C"*16 + "N"*12` and for 10x data based on V2 chemistry it should be set to `"C"*16 + "N"*12`. `bc_pattern` is needed for `UMI_tools` steps before STAR alignment on input 10x data.
+  
 ### Choosing STAR parameters
-These parameters modify which combinations of STAR parameters are run. Be careful about including too many; even if you just have two values for each, you will run the pipeline 16 times. If you have 12 samples, then you're running the pipeline 192 times:
-* `chimSegmentMin`: A list containing every value of the `--chimSegmentMin` STAR parameter you want to run on. Example: `chimSegmentMin = [12,10]`
-* `chimJunctionOverhangMin`: A list containing every value of the `--chimJunctionOverhangMin` STAR parameter you want to run on. Example: `chimJunctionOverhangMin = [13, 10]`
-* `alignSJstitchMismatchNmax`: For every value `<x>` in this list, STAR will be run with `--alignSJstitchMismatchNmax <x> -1 <x> <x>`. Example: `alignSJstitchMismatchNmax = [0,1]`
-* `chimSegmentReadGapMax`: A list containing every value of the `--chimSegmentReadGapMax` STAR parameter you want to run on. Example: `chimSegmentReadGapMax = [0,3]`
+STAR alignment parameters can be adjusted in the `STAR_map` function in `SICILIAN.py`. By default, SICILIAN runs STAR with default parameters. 
 
 ### Choosing which scripts to run
-These parameters let you decide which portion of the script you want to run (for example, if you're modifying the `create_class_input.py` script only, so the mapping shouldn't change):
-* `run_whitelist`: Set equal to True if you want to run UMI-tools whitelist script to extract cell barcodes and identify the most likely true cell barcodes (will be run only for 10X)
-* `run_extract`: Set equal to True if you want to run UMI-tools extract script which removes UMIs from fastq reads and append them to read name
-* `run_map`: Set equal to True if you want to run the mapping job, and False otherwise
-* `run_star_fusion`: Set equal to True if you want to run the STAR-Fusion, and False otherwise
-* `run_ann`: Set equal to True if you want to annotate and concatenate the STAR files, False otherwise
-* `run_class`: Set equal to True if you want to create the class input file, false otherwise
-* `run_modify_class`: Set equal to True if you want to make consistent junction IDs in which reverse strands and discrepancies between reporting alignments in chimeric and aligned sam files are taken care of.
-* `run_ensembl`: Set equal to True if you want to add gene names to the STAR gene count file and add gene ensembl ids and gene counts to the class input file, False otherwise
-* `run_compare`: Set equal to True if you want to comapre the junction in the class inpout file with those in the STAR and STAR-Fusion ouput files, false otherwise
-* `run_GLM`: Set equal to True if you want to run the GLM step and assign statistical scores to each junction in the class input file. The output of this step is a file named `GLM_output.txt`. 
+These parameters let you decide which steps of the SICILIAN pipeline you want to run (for example, if you have run STAR alignment once on a data set but SICILIAN has failed to produce output files, you do not need to run STAR alignment anymore and can just set `run_map` to `False` when rerunning SICILIAN:
+* `run_whitelist`: Set equal to `True` if you want to run UMI-tools whitelist script to extract cell barcodes and identify the most likely true cell barcodes (will be run only for 10X)
+* `run_extract`: Set equal to `True` if you want to run UMI-tools extract script which removes UMIs from fastq reads and append them to read name
+* `run_map`: Set equal to `True` if you want to run the mapping job, and False otherwise
+* `run_GLM`: Set equal to `True` if you want to run the GLM step and assign statistical scores to each junction in the class input file. The output of this step is a file named `GLM_output.txt`. 
 
-After assigning these variables, run `python3 write_jobs.py` to submit the jobs.
+After assigning these variables, run `python3 SICILIAN.py` to submit the SICILIAN jobs for the input data.
 
 ## Description of output
 

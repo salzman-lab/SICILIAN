@@ -3,6 +3,12 @@
 
 SICILIAN is a statistical method for identifying RNA splice junctions using alignments reported from a spliced aligner. SICILIAN is currently implemented for the STAR aligner, and will be adapted to more spliced aligner in the newar future.
 
+## Citation
+Dehghannasiri, R., Olivieri, J.E., and Salzman, J. "Specific splice junction detection in single cells with SICILIAN", bioRxiv, April 2020. (https://www.biorxiv.org/content/10.1101/2020.04.14.041905v1)
+
+## Contact
+Please contact Roozbeh Dehghannasiri (rdehghan@stanford.edu) or Julia Eve Olivieri (jolivier@stanford.edu).
+
 ## How to run SICILIAN
 There are two options for running SICILIAN
 1. using the ready-to-run cloud-based online tool with CWL implementation without the need for preinstallations on the cancer genomics cloud platform.
@@ -161,9 +167,3 @@ The following columns exist in the `GLM_output.txt` file:
 * `exon_annR1B`: the exon on the second half of the junction is at an annotated boundary
 * `missing_domains`: the protein domains that have been missed (spliced out) due to splicing   
 * `domain_insertions`: the protein domains to which the splice junction adds amino acid sequence
-
-## Citation
-Dehghannasiri, R., Olivieri, J.E., and Salzman, J. "Specific splice junction detection in single cells with SICILIAN", bioRxiv, April 2020. (https://www.biorxiv.org/content/10.1101/2020.04.14.041905v1)
-
-## Contact
-Please contact Roozbeh Dehghannasiri (rdehghan@stanford.edu) or Julia Eve Olivieri (jolivier@stanford.edu).

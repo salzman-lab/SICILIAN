@@ -4,7 +4,7 @@
 SICILIAN is a statistical method for identifying RNA splice junctions using alignments reported from a spliced aligner. SICILIAN is currently implemented for the STAR aligner, and will be adapted to more spliced aligner in the newar future.
 
 ## Citation
-Dehghannasiri, R., Olivieri, J.E., and Salzman, J. "Specific splice junction detection in single cells with SICILIAN", bioRxiv, April 2020. (https://www.biorxiv.org/content/10.1101/2020.04.14.041905v1)
+Dehghannasiri*, R., Olivieri*, J.E., and Salzman, J. "Specific splice junction detection in single cells with SICILIAN", bioRxiv, April 2020. (https://www.biorxiv.org/content/10.1101/2020.04.14.041905v1)
 
 ## Contact
 Please contact Roozbeh Dehghannasiri (rdehghan@stanford.edu) or Julia Eve Olivieri (jolivier@stanford.edu).

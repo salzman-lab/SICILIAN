@@ -82,13 +82,14 @@ Update the input parameters in `SICILIAN.py` script with information about your 
 STAR alignment parameters can be adjusted in the `STAR_map` function in `SICILIAN.py`. By default, SICILIAN runs STAR with default parameters. 
 
 ### Choosing which scripts to run
-These parameters let you decide which steps of the SICILIAN pipeline you want to run (for example, if you have run STAR alignment once on a data set but SICILIAN has failed to produce output files, you do not need to run STAR alignment anymore and can just set `run_map` to `False` when rerunning SICILIAN:
+These parameters let you decide which steps of the SICILIAN pipeline you want to run (for example, if you have run STAR alignment once on a data set but SICILIAN has failed to produce output files, you do not need to run STAR alignment once again and can just set `run_map` to `False` to skip the alignment step when rerunning SICILIAN):
 * `run_whitelist`: Set equal to `True` if you want to run UMI-tools whitelist script to extract cell barcodes and identify the most likely true cell barcodes (will be run only for 10X)
-* `run_extract`: Set equal to `True` if you want to run UMI-tools extract script which removes UMIs from fastq reads and append them to read name
-* `run_map`: Set equal to `True` if you want to run the mapping job, and False otherwise
+* `run_extract`: Set equal to `True` if you want to run UMI-tools extract script which removes UMIs from fastq reads and append them to read name (will be ron only for 10x)
+* `run_map`: Set equal to `True` if you want to run the STAR alignment, and `False` otherwise
+* `run_class`: Set equal to `True` if you want to run the class input job, and `False` otherwise
 * `run_GLM`: Set equal to `True` if you want to run the GLM step and assign statistical scores to each junction in the class input file. The output of this step is a file named `GLM_output.txt`. 
 
-After assigning these variables, run `python3 SICILIAN.py` to submit the SICILIAN jobs for the input data.
+After assigning these variables, run `python3 SICILIAN.py` on the command line to submit the SICILIAN jobs for the input data.
 
 ## Description of output
 

@@ -103,11 +103,16 @@ def STAR_map(out_path, data_path, name, r_ends, gzip, single, gtf_file, tenX, st
     command += "--alignIntronMax 1000000 "
     command += "--outFileNamePrefix {}{}/{} ".format(out_path, name, i + 1)
     command += "--outSAMtype BAM Unsorted "
-    command += "--chimSegmentMin 10 "
     command += "--outSAMattributes All "
     command += "--chimOutType WithinBAM SoftClip Junctions "
     command += "--chimJunctionOverhangMin 10 "
     command += "--chimSegmentReadGapMax 0 "
+    command += "--chimOutJunctionFormat 1 "
+    command += "--chimSegmentMin 12 "
+    command += "--chimMultimapNmax 20 "
+    command += "--chimScoreJunctionNonGTAG -4 "
+    command += "--chimNonchimScoreDropMin 10 "
+    command += "--chimMultimapScoreRange 3 "
     command += "--quantMode GeneCounts "
     command += "--sjdbGTFfile {} ".format(gtf_file)
     command += "--outReadsUnmapped Fastx \n\n"
@@ -130,11 +135,11 @@ def main():
 #################################################################################
 ################## Input arguments that should be fixed  ########################
   data_path = "/scratch/PI/horence/Roozbeh/single_cell_project/data/TSP2_NovaSeq_Rerun/"
+  names = ["TSP2_Bladder_NA_10X_1_1_S5_L003"]
+  r_ends = ["_R1_001.fastq.gz", "_R2_001.fastq.gz"]
   out_dir = "/scratch/PI/horence/Roozbeh/single_cell_project/output"
   run_name = "test"
-  r_ends = ["_R1_001.fastq.gz", "_R2_001.fastq.gz"]
-  names = ["TSP2_Bladder_NA_10X_1_1_S5_L003"]
-  star_path = "/oak/stanford/groups/horence/Roozbeh/single_cell_project/STAR-2.7.3a/bin/Linux_x86_64/STAR"
+  star_path = "/oak/stanford/groups/horence/Roozbeh/software/STAR-2.7.5a/bin/Linux_x86_64/STAR"
   star_ref_path = "/oak/stanford/groups/horence/Roozbeh/single_cell_project/STAR-2.7.1a/hg38_index_2.7.1a"
   gtf_file = "/oak/stanford/groups/horence/circularRNApipeline_Cluster/index/grch38_known_genes.gtf"
   annotator_file = "/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/STAR_wrapper/annotators/hg38.pkl"

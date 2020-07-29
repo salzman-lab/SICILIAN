@@ -17,7 +17,7 @@ def get_transcript_id(row):
 
 def get_exon_number(row):
   if "gene_name" in row["attribute"]:
-    return int(row["attribute"].split("exon_number")[-1].split('"')[1])
+    return int(row["attribute"].split("exon_number")[-1].split("\"")[0].split(";")[0])
 
 #def get_exon_number2(row):
 #  return int(row["attribute"].split("ID=exon")[1].split(";")[0].split("-")[-1])

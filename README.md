@@ -15,7 +15,7 @@ There are two options for running SICILIAN
 2. Downloading SICILIAN scripts to a local high performance computing (HPC) cluster and running SICILIAN after installing required libraries. 
 
 ## Online cloud-based tool for SICILIAN
-The cloud-based computational workflow for SICILIAN has been implemented on the Seven Bridges Cancer Genomics Cloud platform sponsored by the National Cancer Institute. The workflow is fully dockerized and has a user-friendly interface, which facilitates running SICILIAN even for users with little bioinformatics expertise. User only needs to upload his/her own RNA-Seq fastq files or use RNA-Seq files publicly-available on CGC (i.e., TCGA, CCLE, TARGET, ...) to run SICILIAN and selects correct annotation and index files to run SICILIAN. The online tool can be accessed via: https://cgc.sbgenomics.com/u/anaDsbg/sicilian-dev/ 
+The cloud-based computational workflow for SICILIAN has been implemented on the Seven Bridges Cancer Genomics Cloud platform sponsored by the National Cancer Institute. The workflow is fully dockerized and has a user-friendly interface, which facilitates running SICILIAN even for users with little bioinformatics expertise. User only needs to upload his/her own RNA-Seq fastq files or use RNA-Seq files publicly-available on CGC (i.e., TCGA, CCLE, TARGET, ...) to run SICILIAN and selects correct annotation and index files to run SICILIAN. The online tool can be accessed via: https://cgc.sbgenomics.com/public/apps#jordanski.milos/deepest-fusion/sicilian/
 
 ## Running SICILIAN scripts on a local cluster
 

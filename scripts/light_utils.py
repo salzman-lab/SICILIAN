@@ -27,7 +27,7 @@ def modify_refnames(CI, gtf_file, stranded_library):
   swap_names = False
   CI["HIR1B"] = CI["HIR1A"]
 #  CI = pd.read_csv("/oak/stanford/groups/horence/Roozbeh/single_cell_project/output/HLCA_171205_10X_cSM_10_cJOM_10_aSJMN_0_cSRGM_0/P1_3_S1_L001/test_class_input.tsv","\t")
-  CI_new = CI.drop_duplicates("refName_ABR1")
+  CI_new = CI.drop_duplicates("refName_ABR1")[["geneR1A","geneR1B","fileTypeR1","read_strandR1B","read_strandR1A","refName_ABR1","chrR1A","chrR1B","juncPosR1A","juncPosR1B"]]
   
 
   CI_new["geneR1A"] = CI_new["geneR1A"].fillna("")

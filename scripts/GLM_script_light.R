@@ -247,16 +247,16 @@ add_ensembl <- function(gtf_file,directory,class_input,is.SE){
   setnames(class_input,old = "gene_id" ,new = "geneR1A_ensembl")
   class_input = merge(class_input,unique(gene_name_id[!duplicated(gene_name),list(gene_name,gene_id)]),by.x = "geneR1B_uniq",by.y = "gene_name",all.x = TRUE,all.y = FALSE)
   setnames(class_input,old = "gene_id" ,new = "geneR1B_ensembl")
-  
+  print("after merging with gene ensembl")  
   if("length" %in% names(gtf_info)){
-    class_input = merge(class_input,gene_count[,list(ensembl_id,V2,V3,RPKM_unstranded,RPKM_stranded)],by.x = "geneR1A_ensembl",by.y = "ensembl_id",all.x = TRUE,all.y = FALSE)
+    class_input = merge(class_input,gene_count[!duplicated(ensembl_id),list(ensembl_id,V2,V3,RPKM_unstranded,RPKM_stranded)],by.x = "geneR1A_ensembl",by.y = "ensembl_id",all.x = TRUE,all.y = FALSE)
     setnames(class_input,old = c("V2","V3","RPKM_unstranded","RPKM_stranded") ,new = c("geneR1A_expression_unstranded","geneR1A_expression_stranded","geneR1A_RPKM_unstranded","geneR1A_RPKM_stranded"))
-    class_input = merge(class_input,gene_count[,list(ensembl_id,V2,V3,RPKM_unstranded,RPKM_stranded)],by.x = "geneR1B_ensembl",by.y = "ensembl_id",all.x = TRUE,all.y = FALSE)
+    class_input = merge(class_input,gene_count[!duplicated(ensembl_id),list(ensembl_id,V2,V3,RPKM_unstranded,RPKM_stranded)],by.x = "geneR1B_ensembl",by.y = "ensembl_id",all.x = TRUE,all.y = FALSE)
     setnames(class_input,old = c("V2","V3","RPKM_unstranded","RPKM_stranded") ,new = c("geneR1B_expression_unstranded","geneR1B_expression_stranded","geneR1B_RPKM_unstranded","geneR1B_RPKM_stranded"))
   }else{
-    class_input = merge(class_input,gene_count[,list(ensembl_id,V2,V3)],by.x = "geneR1A_ensembl",by.y = "ensembl_id",all.x = TRUE,all.y = FALSE)
+    class_input = merge(class_input,gene_count[!duplicated(ensembl_id),list(ensembl_id,V2,V3)],by.x = "geneR1A_ensembl",by.y = "ensembl_id",all.x = TRUE,all.y = FALSE)
     setnames(class_input,old = c("V2","V3") ,new = c("geneR1A_expression_unstranded","geneR1A_expression_stranded"))
-    class_input = merge(class_input,gene_count[,list(ensembl_id,V2,V3)],by.x = "geneR1B_ensembl",by.y = "ensembl_id",all.x = TRUE,all.y = FALSE)
+    class_input = merge(class_input,gene_count[!duplicated(ensembl_id),list(ensembl_id,V2,V3)],by.x = "geneR1B_ensembl",by.y = "ensembl_id",all.x = TRUE,all.y = FALSE)
     setnames(class_input,old = c("V2","V3") ,new = c("geneR1B_expression_unstranded","geneR1B_expression_stranded"))
   }
   
@@ -444,6 +444,7 @@ toc()
 ## add ensembl ids
 class_input = add_ensembl(gtf_file,directory,class_input,is.SE)
 
+print("after add_ensembl")
 class_input[fileTypeR1 == "Chimeric",is.STAR_Chim := ""]
 class_input[fileTypeR1 == "Aligned",is.STAR_SJ := ""]
 

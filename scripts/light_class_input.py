@@ -255,10 +255,10 @@ def get_final_df(bam_files,j,suffixes,ann,UMI_bar,t0,gtf, stranded_library):
 
   #  final_df.to_parquet(args.outpath + "class_input_final.pq")
   final_df["primary_bam"] = j
-  primary = final_df[final_df["HIR1A"] == final_df["max_id_priority"]]
-  secondary = final_df[final_df["HIR1A"] != final_df["max_id_priority"]]
+  final_df = final_df[final_df["HIR1A"] == final_df["max_id_priority"]]
+#  secondary = final_df[final_df["HIR1A"] != final_df["max_id_priority"]]
 
-  return primary, secondary
+  return final_df
 
 def main():
   t0 = time.time()
@@ -274,7 +274,7 @@ def main():
   suffixes = ["R1","R2"]
 
   final_dfs = []
-  final_dfs_secondary = []
+#  final_dfs_secondary = []
   
   if args.paired:
     n_rounds = 2
@@ -285,9 +285,9 @@ def main():
     if j == 1:
       bam_files.reverse()
     print("bam_files",bam_files)
-    primary, secondary = get_final_df(bam_files,j,suffixes,ann,args.UMI_bar,t0,gtf,args.stranded_library)
+    primary = get_final_df(bam_files,j,suffixes,ann,args.UMI_bar,t0,gtf,args.stranded_library)
     final_dfs.append(primary)
-    final_dfs_secondary.append(secondary)
+#    final_dfs_secondary.append(secondary)
 #  final_df = pd.concat(final_dfs,axis=0).reset_index(drop=True)
 
 
@@ -298,13 +298,13 @@ def main():
 #  final_df.to_parquet(args.outpath + "class_input_final.pq")
 
   pd.concat(final_dfs,axis=0).reset_index(drop=True).to_parquet(args.outpath + "class_input.pq")
-  pd.concat(final_dfs_secondary,axis=0).reset_index(drop=True).to_parquet(args.outpath + "class_input_secondary.pq")
+#  pd.concat(final_dfs_secondary,axis=0).reset_index(drop=True).to_parquet(args.outpath + "class_input_secondary.pq")
 
 #  final_df[final_df["HIR1A"] == final_df["max_id_priority"]].to_hdf(args.outpath + "class_input.h5", key="class_input")
 #  final_df[final_df["HIR1A"] != final_df["max_id_priority"]].to_hdf(args.outpath + "class_input_secondary.h5", key="class_input_secondary")
 
   pd.concat(final_dfs,axis=0).reset_index(drop=True).to_csv(args.outpath + "class_input.tsv",sep="\t",index=False)
-  pd.concat(final_dfs_secondary,axis=0).reset_index(drop=True).to_csv(args.outpath + "class_input_secondary.tsv",sep="\t",index=False)
+#  pd.concat(final_dfs_secondary,axis=0).reset_index(drop=True).to_csv(args.outpath + "class_input_secondary.tsv",sep="\t",index=False)
 #  final_df["juncPosR1A"] = final_df["juncPosR1A"].astype("Int32")
 #  final_df["juncPosR1B"] = final_df["juncPosR1B"].astype("Int32") 
 

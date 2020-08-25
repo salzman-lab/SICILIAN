@@ -34,6 +34,10 @@ def GLM(out_path, name, gtf_file, single, domain_file, exon_pickle_file, splice_
     command += " 1 "
   else:
     command += " 0 "
+  if tenX:
+    command += " 1 "
+  else:
+    command += " 0 "
   command += "{} {} {} ".format(domain_file, exon_pickle_file, splice_pickle_file)
   sbatch_file("run_GLM.sh", out_path, name,"GLM_{}".format(name), "24:00:00", "100Gb", command, dep=dep)  # used 200Gb for CML 80Gb for others and 300 for 10x blood3 
   return submit_job("run_GLM.sh")
@@ -211,7 +215,7 @@ def main():
       class_input_jobid = ""
 
     if run_GLM:
-      GLM_jobid = GLM(out_path, name, gtf_file, single, domain_file, exon_pickle_file, splice_pickle_file, dep=":".join(job_nums))
+      GLM_jobid = GLM(out_path, name, gtf_file, single, tenX, domain_file, exon_pickle_file, splice_pickle_file, dep=":".join(job_nums))
       jobs.append("GLM_{}.{}".format(name,GLM_jobid))
       job_nums.append(GLM_jobid)
     else:

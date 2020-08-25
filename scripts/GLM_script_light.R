@@ -340,7 +340,7 @@ compute_class_error <- function(train_class, glm_predicted_prob){
   print(paste("classification errors for glm", totalerr, "out of", length(train_class), totalerr/length(train_class) ))
 }
 
-compute_junc_cdf <- function(class_input, p_predicted_column, per_read_column, junc_cdf_column,is.10X){
+compute_junc_cdf <- function(class_input, p_predicted_column, per_read_column, junc_cdf_column){
   # compute the junc_cdf scores
   
   
@@ -355,15 +355,11 @@ compute_junc_cdf <- function(class_input, p_predicted_column, per_read_column, j
   setkey(class_input,refName_newR1)
   iter=10000
   class_input[, sum_log_per_read_prob:= sum(log_per_read_prob), by = refName_newR1]
-  if(is.10X == 0){
+  
     mu_i = mean(log( (1-class_input[fileTypeR1 == "Aligned"| (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob)/ class_input[fileTypeR1 == "Aligned"| (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob) )
     var_i = var(log( (1-class_input[fileTypeR1 == "Aligned"| (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob)/ class_input[fileTypeR1 == "Aligned"| (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob) )
     all_per_read_probs = class_input[(fileTypeR1 == "Aligned") | (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob
-  } else{
-    mu_i = mean(log( (1-class_input[fileTypeR1 == "Aligned" & genomicAlignmentR1 ==1]$per_read_prob)/ class_input[fileTypeR1 == "Aligned" & genomicAlignmentR1 ==1]$per_read_prob) )
-    var_i = var(log( (1-class_input[fileTypeR1 == "Aligned" & genomicAlignmentR1 ==1]$per_read_prob)/ class_input[fileTypeR1 == "Aligned" & genomicAlignmentR1 ==1]$per_read_prob) )
-    all_per_read_probs = class_input[fileTypeR1 == "Aligned" & genomicAlignmentR1 ==1]$per_read_prob
-  }
+  
   num_per_read_probs = length(all_per_read_probs)
   for (num_reads in 1:15){
     rnd_per_read_probs = matrix(0, iter, num_reads)
@@ -403,6 +399,7 @@ args = commandArgs(trailingOnly = TRUE)
 directory = args[1]
 gtf_file = args[2]
 is.SE = as.numeric(args[3])
+is.10X = as.numeric(args[4])
 #####################################
 
 ### arguments for debugging ######
@@ -419,7 +416,7 @@ class_input =  fread(class_input_file, sep = "\t", header = TRUE)
 
 
 # do deduplication for 10X data
-if(directory %like% "10X"){
+if(is.10X == 1){
   class_input = class_input[!duplicated(paste(barcode,UMI,refName_newR1))]
 }
 
@@ -561,7 +558,20 @@ print(glmnet_model_constrained)
 
 # predict for all read alignments in the class input file
 class_input_glmnet = model.matrix(update(regression_formula, refName_newR1 ~ .), class_input)
-class_input$glmnet_per_read_prob_constrained = predict(glmnet_model_constrained, newx = class_input_glmnet, type = "response", s = "lambda.1se", se.fit = TRUE)
+
+if(nrow(class_input_glmnet)>20000000){ # if class input is too large, we apply the predict function sequentially on the smaller chunks of the data frame
+  num_iter = ceiling(nrow(class_input_glmnet)/20000000)
+  a = c()
+  for (counter in 1:num_iter){
+    start = (counter-1)*20000000 + 1
+    end = min(counter*20000000, nrow(class_input_glmnet))
+    a[start:end] = predict(glmnet_model_constrained, newx = class_input_glmnet[start:end,], type = "response", s = "lambda.1se", se.fit = TRUE)
+  }
+  class_input$glmnet_per_read_prob_constrained = a
+} else{
+  class_input$glmnet_per_read_prob_constrained = predict(glmnet_model_constrained, newx = class_input_glmnet, type = "response", s = "lambda.1se", se.fit = TRUE)
+}
+
 
 # compute the fitted classification error based on training data
 compute_class_error(class_input[!is.na(train_class)]$train_class, class_input[!is.na(train_class)]$glmnet_per_read_prob_constrained)
@@ -571,8 +581,7 @@ class_input[, p_predicted_glmnet_constrained:= 1/( exp(sum(log( (1 - glmnet_per_
 
 
 # compute the junc_cdf scores
-is.10X = 0
-class_input = compute_junc_cdf(class_input , "p_predicted_glmnet_constrained", "glmnet_per_read_prob_constrained", "junc_cdf_glmnet_constrained",is.10X)
+class_input = compute_junc_cdf(class_input , "p_predicted_glmnet_constrained", "glmnet_per_read_prob_constrained", "junc_cdf_glmnet_constrained")
 print("done with GLMnet constrained")
 
 
@@ -581,7 +590,7 @@ if (is.SE==0){
   class_input[, glmnet_per_read_prob_corrected_constrained := glmnet_per_read_prob_constrained]
   class_input[(location_compatible==0 | read_strand_compatible==0), glmnet_per_read_prob_corrected_constrained:=glmnet_per_read_prob_constrained/(1 + glmnet_per_read_prob_constrained)]
   class_input[, p_predicted_glmnet_corrected_constrained := 1/( exp(sum(log( (1 - glmnet_per_read_prob_corrected_constrained)/glmnet_per_read_prob_corrected_constrained ))) + 1), by = refName_newR1]
-  class_input = compute_junc_cdf(class_input , "p_predicted_glmnet_corrected_constrained", "glmnet_per_read_prob_corrected_constrained", "junc_cdf_glmnet_corrected_constrained",is.10X)
+  class_input = compute_junc_cdf(class_input , "p_predicted_glmnet_corrected_constrained", "glmnet_per_read_prob_corrected_constrained", "junc_cdf_glmnet_corrected_constrained")
   print("done with GLMnet corrected contrained")
   toc()  
 }
@@ -628,7 +637,7 @@ if (nrow(class_input[fileTypeR1=="Chimeric"])>0){
   } else{
     regression_formula = as.formula("train_class ~ overlap_R1 * max_overlap_R1  + nmmR1 + length_adj_AS_R1A + length_adj_AS_R1B + entropyR1")
   }
-
+  
   tic("Two-step GLMnet constrained")
   print("Two-step GLMnet constrained")
   x_glmnet = model.matrix(regression_formula, class_input[!is.na(train_class)])
@@ -741,8 +750,8 @@ junction_prediction[, c("cigarR1A","cigarR1B"):= NULL]
 sicilian_splicing_called_junctions = postprocessing(junction_prediction,class_input,is.10X,is.SE)
 
 # use the following function to find inserted/missing domains for each called junction (this function will be run only when ucsc domain annotation files have been provided)
-if ((length(args)==4) | (length(args)==6)){
-  ucsc_domain_file = args[4]
+if ((length(args)==5) | (length(args)==7)){
+  ucsc_domain_file = args[5]
   sicilian_splicing_called_junctions = domain_annotation(ucsc_domain_file,sicilian_splicing_called_junctions)
 }
 
@@ -752,7 +761,7 @@ write.table(class_input, paste(directory,"class_input.tsv", sep = ""), row.names
 write.table(sicilian_splicing_called_junctions, paste(directory,"sicilian_called_splice_juncs.tsv", sep = ""), row.names = FALSE, quote = FALSE, sep = "\t")
 
 # use this for annotating the exon boudnaries in the called junctions (this function will be run only when exon and splice annotation pickle files have been provided)
-if ((length(args)==5) | (length(args)==6)){
+if ((length(args)==6) | (length(args)==7)){
   exon_pickle = args[length(args)-1]
   splice_pickle = args[length(args)]
   script_directory = getwd()

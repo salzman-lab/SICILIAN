@@ -57,7 +57,7 @@ def extract(out_path, data_path, name, bc_pattern, r_ends, dep = ""):
   command += "--read2-in {}{}{} ".format(data_path, name, r_ends[1])
   command += "--read2-out={}{}_extracted{} ".format(data_path, name, r_ends[1])
 #  command += "--read2-stdout "
-  command += "--filter-cell-barcode "
+#  command += "--filter-cell-barcode "
   command += "--whitelist={}{}_whitelist.txt ".format(data_path, name)
   command += "--error-correct-cell "
   sbatch_file("run_extract.sh", out_path, name,"extract_{}".format(name), "48:00:00", "20Gb", command, dep = dep)

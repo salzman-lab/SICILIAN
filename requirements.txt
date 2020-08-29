@@ -1,0 +1,7 @@
+###### Required python packages for runnins SICILIAN ######`
+
+argparse
+numpy
+pandas
+pyarrow
+pysam

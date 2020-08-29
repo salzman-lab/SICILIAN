@@ -1,12 +1,12 @@
 run*
 write_*
-test*
+*test*
 *sample_list*
 *.fa
 *.tsv
 Lemur_*
 HLCA*
 Krasnow*
-*txt
+*sample*
 *tsv
 slurm*

@@ -28,29 +28,21 @@ git clone https://github.com/salzmanlab/SICILIAN.git
 - Set the input variables in `SICILIAN.py` which is the main script that submits all necessary jobs for running SICILIAN on input RNA-Seq data. 
 - For running SICILIAN on 10x scRNA-Seq data, it needs to first demultiplex 10x fastq file based on cell barcode and UMI information stored in R1. For 10x analysis, SICILIAN executes `whitelise` and `extract` commands from `UMI_tools` software. Therefore, `UMI_tools` should be preinstalled on the local cluster for running SICILIAN on 10x samples.  
 ### Software requirements 
-- SICILIAN has been developed using `Python 3.6.1` and the following libraries are needed to be installed
+- SICILIAN has been developed using `Python 3.6.1`. The following python packages are needed to be installed (they can be installed using the `requirements.txt` file in the SICILIAN repository and command `pip install -r requirements.txt`):
   - argparse
-  - collections
-  - datetime
-  - math
   - numpy
-  - os
   - pandas
   - pyarrow
-  - pickle
   - pysam
-  - re
-  - time
-  - sys
 
-- SICILIAN has been developed with `R 3.6.1` and needs the following packages are needed to be installed in `R`:
+- SICILIAN has been developed with `R 3.6.1` and needs the following packages are needed to be installed in `R` (R scripts in SICILIAN automatically check to see if an R library is already installed and then install those that are needed. So no need for manual preinstallation!):
   - data.table
   - glmnet
   - tictoc
   - dplyr
   - stringr
   - GenomicAlignments
-  (R scripts in SICILIAN automatically check to see if an R library is already installed and then install those that are needed. So no need for manual preinstallation!) 
+   
   
 ### Building annotator and index files
 SICLIAN uses STAR as the aligner and therefore STAR index files need to be input to SICILIAN. STAR index files can be built using the following command:

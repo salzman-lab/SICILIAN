@@ -27,7 +27,7 @@ def modify_refnames(CI, gtf_file, stranded_library):
   swap_names = False
   CI["HIR1B"] = CI["HIR1A"]
 #  CI = pd.read_csv("/oak/stanford/groups/horence/Roozbeh/single_cell_project/output/HLCA_171205_10X_cSM_10_cJOM_10_aSJMN_0_cSRGM_0/P1_3_S1_L001/test_class_input.tsv","\t")
-  CI_new = CI.drop_duplicates("refName_ABR1")[["geneR1A","geneR1B","fileTypeR1","read_strandR1B","read_strandR1A","refName_ABR1","chrR1A","chrR1B","juncPosR1A","juncPosR1B"]]
+  CI_new = CI.drop_duplicates("refName_ABR1")
   
 
   CI_new["geneR1A"] = CI_new["geneR1A"].fillna("")
@@ -180,19 +180,19 @@ def modify_refnames(CI, gtf_file, stranded_library):
 
 ## adding the junction type to refName_newR1
   CI_new["junc_type"] = ""
-  ind = CI_new[(CI_new["chrR1A"] != CI_new["chrR1B"]) | ((CI_new["gene_strandR1A"] == CI_new["gene_strandR1B"]) & (abs(CI_new["juncPosR1A"] - CI_new["juncPosR1B"])>=1000000) ) & (CI_new["gene_strandR1A"] !=  "?")].index
+  ind = CI_new[(CI_new["chrR1A"] != CI_new["chrR1B"]) | ((CI_new["read_strandR1A"] == CI_new["read_strandR1B"]) & (abs(CI_new["juncPosR1A"] - CI_new["juncPosR1B"])>=1000000) ) & (CI_new["fileTypeR1"]=="Chimeric")].index
   CI_new.loc[ind,"refName_newR1"] = CI_new.loc[ind]["refName_newR1"] + "|fus"
   CI_new.loc[ind,"junc_type"] = "fus"
 
-  ind = CI_new[(CI_new["chrR1A"] == CI_new["chrR1B"]) & (CI_new["gene_strandR1A"] != CI_new["gene_strandR1B"]) & (CI_new["gene_strandR1A"] !=  "?")].index
+  ind = CI_new[(CI_new["chrR1A"] == CI_new["chrR1B"]) & (CI_new["read_strandR1A"] != CI_new["read_strandR1B"])  & (CI_new["fileTypeR1"]=="Chimeric")].index
   CI_new.loc[ind,"refName_newR1"] = CI_new.loc[ind]["refName_newR1"] + "|sc"
   CI_new.loc[ind,"junc_type"] = "sc"
 
-  ind = CI_new[(CI_new["junc_type"] != "sc") & (CI_new["junc_type"] != "fus") &  ( ((CI_new["gene_strandR1A"] == "+") & (CI_new["juncPosR1A"] > CI_new["juncPosR1B"])) | ((CI_new["gene_strandR1A"] == "-") & (CI_new["juncPosR1A"] < CI_new["juncPosR1B"])) ) & (CI_new["gene_strandR1A"] !=  "?")].index
+  ind = CI_new[(CI_new["junc_type"] != "sc") & (CI_new["junc_type"] != "fus") &  ( ((CI_new["read_strandR1A"] == "+") & (CI_new["juncPosR1A"] > CI_new["juncPosR1B"])) | ((CI_new["read_strandR1A"] == "-") & (CI_new["juncPosR1A"] < CI_new["juncPosR1B"])) ) & (CI_new["fileTypeR1"]=="Chimeric")].index
   CI_new.loc[ind,"refName_newR1"] = CI_new.loc[ind]["refName_newR1"] + "|rev"
   CI_new.loc[ind,"junc_type"] = "rev"
 
-  ind = CI_new[(CI_new["junc_type"] != "sc") & (CI_new["junc_type"] != "fus") & (CI_new["junc_type"] != "rev") & (CI_new["gene_strandR1A"] !=  "?")].index
+  ind = CI_new[((CI_new["junc_type"] != "sc") & (CI_new["junc_type"] != "fus") & (CI_new["junc_type"] != "rev")) | (CI_new["fileTypeR1"]=="Aligned")].index
   CI_new.loc[ind,"refName_newR1"] = CI_new.loc[ind]["refName_newR1"] + "|lin"
  
   CI_new = CI_new.drop("junc_type", axis=1)

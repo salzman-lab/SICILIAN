@@ -203,7 +203,7 @@ add_ensembl <- function(gtf_file,directory,class_input,is.SE){
     gene_count[,ensembl_id:=strsplit(V1,split = ".",fixed = TRUE)[[1]][1],by = 1:nrow(gene_count)]
   }
   if ("gene_name" %in% names(gene_count)){
-    gene_count[,gene_name := NULL]  # if there is a gene name column from the past in the file, we want to delete it to avoid errors
+    gene_count[,c("gene_name","length") := NULL]  # if there is a gene name column from the past in the file, we want to delete it to avoid errors
   }
   ##########################################
   
@@ -260,7 +260,7 @@ add_ensembl <- function(gtf_file,directory,class_input,is.SE){
   }
   
   ## write output files
-  #  write.table(gene_count,genecount_file,row.names = FALSE,sep = "\t",quote = FALSE)
+  write.table(gene_count,genecount_file,row.names = FALSE,sep = "\t",quote = FALSE)
   return(class_input)
 }
 
@@ -400,7 +400,9 @@ directory = args[1]
 gtf_file = args[2]
 is.SE = as.numeric(args[3])
 is.10X = as.numeric(args[4])
+is.stranded = as.numeric(args[5])
 #####################################
+toc()
 
 ### arguments for debugging ######
 #is.SE = 1
@@ -424,6 +426,39 @@ setkey(class_input,refName_newR1)
 if(is.SE ==0){  # I want to discard those reads that have an unaligned R2 in PE data
   class_input = class_input[!is.na(nmmR2A)]
 }
+
+## if data is unstranded (such as smartseq), I want to make reads for A-B and B-A junctions consistent by changing one junction to the other one
+if (is.stranded==0){
+  tic("unstranded data modification")
+  class_input[, numReads:=length(unique(id)), by = refName_newR1]
+  class_input[,pos1:=paste(juncPosR1A,juncPosR1B,sep="-"),by=refName_newR1]
+  class_input[,pos2:=paste(juncPosR1B,juncPosR1A,sep="-"),by=refName_newR1]
+  class_input[pos1%in%class_input$pos2,ambig:=1] # ambig determines that both junctions A-B and B-A are present in the class input
+  class_input[(geneR1A_uniq=="unknown") & (geneR1B_uniq=="unknown"),num_unknown_gene:=2] # count the number of unknown gene names in the junction id
+  class_input[!((geneR1A_uniq=="unknown") | (geneR1B_uniq=="unknown")),num_unknown_gene:=0]
+  class_input[is.na(num_unknown_gene),num_unknown_gene:=1]
+  
+  ambiguous_juncs = merge(class_input[!is.na(ambig)&!duplicated(refName_newR1),list(refName_newR1,numReads,juncPosR1A,juncPosR1B,num_unknown_gene,pos1)],class_input[!duplicated(refName_newR1),list(refName_newR1,numReads,num_unknown_gene,pos2)],all.x=TRUE,all.y=FALSE,by.x="pos1",by.y="pos2")
+  ambiguous_juncs[,swap:=0] # swap determines which id refName_newR1.x or refName_newR1.y should be selected as the final id
+  ambiguous_juncs[num_unknown_gene.x > num_unknown_gene.y, swap:=1] # I prefer to select the id that has fewer unknown gene names
+  ambiguous_juncs[(num_unknown_gene.x==num_unknown_gene.y) & (numReads.x<numReads.y),swap:=1]
+  
+  ambiguous_juncs[,max_pos:=max(juncPosR1A,juncPosR1B),by=refName_newR1.x]
+  ambiguous_juncs[,min_pos:=min(juncPosR1A,juncPosR1B),by=refName_newR1.x]
+  ambiguous_juncs = ambiguous_juncs[!duplicated(paste(max_pos,min_pos))]
+  ambiguous_juncs[swap==1,final_refName:=refName_newR1.y] # the selected junction id
+  ambiguous_juncs[swap==0,final_refName:=refName_newR1.x]
+  ambiguous_juncs[swap==1,old_refName:=refName_newR1.x]  # the discarded junction id
+  ambiguous_juncs[swap==0,old_refName:=refName_newR1.y]
+  
+  class_input = merge(class_input,ambiguous_juncs[,list(final_refName,old_refName)],all.x=TRUE,all.y=FALSE,by.x="refName_newR1",by.y="old_refName")
+  class_input[is.na(final_refName),final_refName:=refName_newR1]
+  class_input[,refName_newR1:=final_refName]
+  class_input[,final_refName:=NULL]
+  toc()
+}
+
+tic()
 class_input[,c("junc_cdf_glm", "junc_cdf_glm_corrected", "junc_cdf_glmnet", "junc_cdf_glmnet_constrained", "junc_cdf_glmnet_corrected", "junc_cdf_glmnet_corrected_constrained"):=NULL]
 class_input[,c("p_predicted_glm", "p_predicted_corrected", "p_predicted_glmnet", "p_predicted_glmnet_constrained", "p_predicted_glmnet_corrected", "p_predicted_glmnet_corrected_constrained"):=NULL]
 class_input[, numReads :=length(unique(id)), by = refName_newR1]
@@ -473,6 +508,19 @@ class_input[, binR1A:=round(juncPosR1A/round.bin)*round.bin]
 class_input[, binR1B:=round(juncPosR1B/round.bin)*round.bin]
 class_input[, njunc_binR1A:=length(unique(refName_newR1)), by = paste(binR1A, chrR1A)]
 class_input[, njunc_binR1B:=length(unique(refName_newR1)), by = paste(binR1B, chrR1B)]
+class_input[, binR1A:= NULL]
+class_input[, binR1B:= NULL]
+############################################
+
+## assigning bins and chromosomes to unknown genes
+options(scipen = 999)
+round.bin = 100000
+class_input[geneR1A_uniq=="",geneR1A_uniq:="unknown"]
+class_input[geneR1B_uniq=="",geneR1B_uniq:="unknown"]
+class_input[geneR1A_uniq=="unknown", binR1A:=round(juncPosR1A/round.bin)*round.bin]
+class_input[geneR1B_uniq=="unknown", binR1B:=round(juncPosR1B/round.bin)*round.bin]
+class_input[geneR1A_uniq=="unknown",geneR1A_uniq:=paste("unknown",chrR1A,binR1A,sep = "_")]
+class_input[geneR1B_uniq=="unknown",geneR1B_uniq:=paste("unknown",chrR1B,binR1B,sep = "_")]
 class_input[, binR1A:= NULL]
 class_input[, binR1B:= NULL]
 ############################################
@@ -692,15 +740,15 @@ iter=5000
 tic("junc_median_p_val")
 for (num_reads in 1:15){
   rnd_overlaps = matrix(0, iter, num_reads)
-  rnd_overlaps = apply(rnd_overlaps,1, function(x) sample(min_overlap_R1:max_overlap_R1, num_reads))
+  rnd_overlaps = apply(rnd_overlaps,1, function(x) sample(min_overlap_R1:max_overlap_R1, num_reads, replace = TRUE))
   rnd_overlaps = t(rnd_overlaps)
   if(num_reads == 1){
     rnd_overlaps = t(rnd_overlaps)  # for num_reads=1 I need to transepose twice since first I have a vector
   }
   null_dist_medians = apply(rnd_overlaps,1, function(x) median(x))
-  class_input[numReads == num_reads, p_val_median_overlap_R1:=length(which(null_dist_medians >= median_overlap_R1))/iter, by = median_overlap_R1]
+  class_input[numReads == num_reads, p_val_median_overlap_R1:=length(which(null_dist_medians > median_overlap_R1))/iter, by = median_overlap_R1]
 }
-class_input[numReads > 15, p_val_median_overlap_R1:=pnorm(median_overlap_R1, mean = (min_overlap_R1+max_overlap_R1)/2, sd = sqrt( ((max_overlap_R1-min_overlap_R1+1)^2-1) /12), lower.tail = TRUE), by = refName_newR1]
+class_input[numReads > 15, p_val_median_overlap_R1:=pnorm(median_overlap_R1, mean = (min_overlap_R1+max_overlap_R1)/2, sd = sqrt( (max_overlap_R1-min_overlap_R1)^2 /12 /numReads), lower.tail = FALSE), by = refName_newR1]
 toc()
 #####################################
 
@@ -750,8 +798,8 @@ junction_prediction[, c("cigarR1A","cigarR1B"):= NULL]
 sicilian_splicing_called_junctions = postprocessing(junction_prediction,class_input,is.10X,is.SE)
 
 # use the following function to find inserted/missing domains for each called junction (this function will be run only when ucsc domain annotation files have been provided)
-if ((length(args)==5) | (length(args)==7)){
-  ucsc_domain_file = args[5]
+if ((length(args)==6) | (length(args)==8)){
+  ucsc_domain_file = args[6]
   sicilian_splicing_called_junctions = domain_annotation(ucsc_domain_file,sicilian_splicing_called_junctions)
 }
 
@@ -761,7 +809,7 @@ write.table(class_input, paste(directory,"class_input.tsv", sep = ""), row.names
 write.table(sicilian_splicing_called_junctions, paste(directory,"sicilian_called_splice_juncs.tsv", sep = ""), row.names = FALSE, quote = FALSE, sep = "\t")
 
 # use this for annotating the exon boudnaries in the called junctions (this function will be run only when exon and splice annotation pickle files have been provided)
-if ((length(args)==6) | (length(args)==7)){
+if ((length(args)==7) | (length(args)==8)){
   exon_pickle = args[length(args)-1]
   splice_pickle = args[length(args)]
   script_directory = getwd()

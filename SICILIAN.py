@@ -15,7 +15,7 @@ def sbatch_file(file_name,out_path, name, job_name, time, mem, command, dep="", 
   job_file.write("#SBATCH --output={}{}/log_files/{}.%j.out\n".format(out_path, name,job_name))
   job_file.write("#SBATCH --error={}{}/log_files/{}.%j.err\n".format(out_path, name,job_name))
   job_file.write("#SBATCH --time={}\n".format(time))
-  job_file.write("#SBATCH -p quake,owners\n")
+  job_file.write("#SBATCH -p horence,owners\n")
   job_file.write("#SBATCH --nodes=1\n")
   job_file.write("#SBATCH --mem={}\n".format(mem)) 
   if dep != "":
@@ -27,7 +27,7 @@ def sbatch_file(file_name,out_path, name, job_name, time, mem, command, dep="", 
   job_file.close()
 
 
-def GLM(out_path, name, gtf_file, single, domain_file, exon_pickle_file, splice_pickle_file, dep = ""):
+def GLM(out_path, name, gtf_file, single, tenX, domain_file, exon_pickle_file, splice_pickle_file, dep = ""):
   """Run the GLM script to compute the statistical scores for junctions in the class input file"""
   command = "Rscript scripts/GLM_script_light.R {}{}/ {} ".format(out_path, name, gtf_file)
   if single:

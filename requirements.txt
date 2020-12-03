@@ -1,4 +1,4 @@
-###### Required python packages for runnins SICILIAN ######`
+###### Required python packages for running SICILIAN ######`
 
 argparse
 numpy

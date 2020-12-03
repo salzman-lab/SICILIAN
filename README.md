@@ -26,7 +26,7 @@ git clone https://github.com/salzmanlab/SICILIAN.git
 - Intall needed packages for `R` and `Python`
 - Build annotation pickle files and STAR index files for a genome assembly and annotation using `create_annotator.py` script
 - Set the input variables in `SICILIAN.py` which is the main script that submits all necessary jobs for running SICILIAN on input RNA-Seq data. 
-- For running SICILIAN on 10x scRNA-Seq data, it needs to first demultiplex 10x fastq file based on cell barcode and UMI information stored in R1. For 10x analysis, SICILIAN executes `whitelise` and `extract` commands from `UMI_tools` software. Therefore, `UMI_tools` should be preinstalled on the local cluster for running SICILIAN on 10x samples.  
+- For running SICILIAN on 10x scRNA-Seq data, it needs to first demultiplex 10x fastq file based on cell barcode and UMI information stored in R1. For 10x analysis, SICILIAN executes `whitelise` and `extract` commands from `UMI_tools` software (https://github.com/CGATOxford/UMI-tools). Therefore, `UMI_tools` should be preinstalled on the local cluster for running SICILIAN on 10x samples.  
 ### Software requirements 
 - SICILIAN has been developed using `Python 3.6.1`. The following python packages are needed to be installed (they can be installed using the `requirements.txt` file in the SICILIAN repository and command `pip3 install -r requirements.txt`):
   - argparse

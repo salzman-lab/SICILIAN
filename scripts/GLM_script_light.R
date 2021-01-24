@@ -24,6 +24,11 @@ if (!require("stringr")) {
   library(stringr)
 }
 
+if (!require("cutpointr")) {
+  install.packages("cutpointr", dependencies = TRUE)
+  library(stringr)
+}
+
 if (!require("GenomicAlignments")) {
   if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
@@ -36,9 +41,92 @@ if (!require("GenomicAlignments")) {
 
 tic("Entire code")
 
-postprocessing <- function(junction_prediction, class_input, is.10X, is.SE){
+postprocessing_model <- function(GLM_output, class_input, is.SE, is.10X){
+  # the postprocessing_model assigns a probability to each junction based on the junction-level features and that probability can be used for calling junctions
   
-  called_junctions = junction_prediction[fileTypeR1=="Aligned"]
+  GLM_output_chimeric = GLM_output[fileTypeR1=="Chimeric"] # the model is only for aligned junctions but will keep the chimeric junctions as well to add them at the end
+  GLM_output = GLM_output[fileTypeR1=="Aligned"]
+  
+  class_input[NHR1A>1,multimapping:=1]
+  class_input[NHR1A==1,multimapping:=0]
+  class_input[,frac_multimapping:=mean(multimapping),by=refName_newR1]
+  class_input_uniq=class_input[!duplicated(refName_newR1)]
+  GLM_output[,frac_multimapping:=NULL]
+  GLM_output[,frac_mutimapping:=NULL]
+  GLM_output = merge(GLM_output,class_input_uniq[,list(refName_newR1,frac_multimapping)],all.x=TRUE,all.y=FALSE,by.x="refName_newR1",by.y="refName_newR1")
+  GLM_output[,train:=NULL]
+  if (is.SE==1){
+    GLM_output[(frac_multimapping==0) &(frac_genomic_reads==0)  & (!refName_newR1%like%"chrM") &(numReads>1),train:=1]
+    GLM_output[( (frac_multimapping>0.8) | (frac_genomic_reads>0.8)) & (numReads>1),train:=0]
+  } else {
+    GLM_output[(frac_multimapping==0) &(frac_genomic_reads==0) & (frac_anomaly==0)  & (!refName_newR1%like%"chrM") &(numReads>1),train:=1]
+    GLM_output[( (frac_multimapping>0.8) | (frac_genomic_reads>0.8) | (frac_anomaly==1)) & (numReads>1),train:=0]
+  }
+  n.neg = nrow(GLM_output[train == 0])
+  n.pos = nrow(GLM_output[train == 1])
+  class.weight = min(n.pos, n.neg)
+  GLM_output[train == 0, cur_weight := n.pos/n.neg]
+  GLM_output[train == 1, cur_weight := 1]
+  
+  
+  # compute the refined junction noise score
+  round.bin = 50
+  GLM_output[, binR1A:=round(juncPosR1A/round.bin)*round.bin]
+  GLM_output[, binR1B:=round(juncPosR1B/round.bin)*round.bin]
+  GLM_output[,bin_chrR1A:=paste(binR1A, chrR1A)]
+  GLM_output[,bin_chrR1B:=paste(binR1B, chrR1B)]
+  GLM_output[fileTypeR1=="Aligned", njunc_binR1A_new:=length(unique(refName_newR1)), by = bin_chrR1A]
+  GLM_output[fileTypeR1=="Aligned", njunc_binR1B_new:=length(unique(refName_newR1)), by = bin_chrR1B]
+  GLM_output[,c("bin_chrR1A","bin_chrR1B"):=NULL]
+  GLM_output[,max_njunc:=max(njunc_binR1A_new,njunc_binR1B_new),by=1:nrow(GLM_output)]
+  
+  if(nrow(GLM_output[train==0])<30 | nrow(GLM_output[train==1])<30){
+    GLM_output[,postprocess_passed:=1]
+    GLM_output[median_overlap_R1<10,postprocess_passed:=0]
+    GLM_output[ave_max_run_R1 > 9,postprocess_passed:=0]
+    GLM_output[ave_entropyR1 < 4,postprocess_passed:=0]
+    if (is.SE==0){
+      GLM_output[frac_anomaly == 1,postprocess_passed:=0]
+    }
+    GLM_output[frac_multimapping == 1,postprocess_passed:=0]
+  } else{
+    ## now we train and apply the postprocessing model
+    GLM_output[,discrete_overlap:=round((median_overlap_R1)/5)]
+    regression_formula = as.formula("train ~  discrete_overlap*ave_entropyR1+ave_max_run_R1   + max_njunc")
+    x_glmnet = model.matrix(regression_formula, GLM_output[!is.na(train)])
+    glmnet_model_constrained = cv.glmnet(x_glmnet, as.factor(GLM_output[!is.na(train)]$train), family =c("binomial"),weights = GLM_output[!is.na(train)]$cur_weight, intercept = FALSE, alpha = 1, nlambda = 50, nfolds = 5, upper.limits=c(Inf,Inf,Inf,0,0,Inf), lower.limits=c(-Inf,0,0,-Inf,-Inf,0) )
+    coefficients = coef(glmnet_model_constrained)
+    print(coefficients) 
+    f_glmnet = model.matrix(update(regression_formula, refName_newR1 ~ .), GLM_output)
+    a=predict(object = glmnet_model_constrained,newx = f_glmnet,type = "response", s = "lambda.1se", se.fit = TRUE)
+    GLM_output$postprocess_prob=a
+    cp = cutpointr(GLM_output[!is.na(train)], postprocess_prob, train,method = maximize_metric, metric = sum_sens_spec)
+    GLM_output[postprocess_prob<cp$optimal_cutpoint,postprocess_passed:=0]
+    GLM_output[postprocess_prob>=cp$optimal_cutpoint,postprocess_passed:=1]
+    coefficients = as.vector(coefficients)
+    if(length(which(coefficients!=0)) < 2){
+      GLM_output[,postprocess_passed:=1]
+      GLM_output[median_overlap_R1<10,postprocess_passed:=0]
+      GLM_output[ave_max_run_R1 > 9,postprocess_passed:=0]
+      GLM_output[ave_entropyR1 < 4,postprocess_passed:=0]
+    }
+    if (is.SE==0){
+      GLM_output[frac_anomaly == 1,postprocess_passed:=0]
+    }
+    GLM_output[frac_multimapping == 1,postprocess_passed:=0]
+  }
+  GLM_output[ave_max_run_R1 > 14,postprocess_passed:=0]
+  GLM_output[ave_entropyR1 < 3,postprocess_passed:=0]
+  
+  GLM_output = dplyr::bind_rows(GLM_output_chimeric,GLM_output)
+  return(GLM_output)
+  
+}
+
+
+postprocessing_hardthreshold <- function(GLM_output, class_input, is.10X, is.SE){
+  
+  called_junctions = GLM_output[fileTypeR1=="Aligned"]
   called_junctions[,intron_length:=abs(juncPosR1A-juncPosR1B), by = 1:nrow(called_junctions)]
   
   #### filtering out the GLM report file for calling fusions
@@ -356,9 +444,9 @@ compute_junc_cdf <- function(class_input, p_predicted_column, per_read_column, j
   iter=10000
   class_input[, sum_log_per_read_prob:= sum(log_per_read_prob), by = refName_newR1]
   
-    mu_i = mean(log( (1-class_input[fileTypeR1 == "Aligned"| (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob)/ class_input[fileTypeR1 == "Aligned"| (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob) )
-    var_i = var(log( (1-class_input[fileTypeR1 == "Aligned"| (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob)/ class_input[fileTypeR1 == "Aligned"| (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob) )
-    all_per_read_probs = class_input[(fileTypeR1 == "Aligned") | (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob
+  mu_i = mean(log( (1-class_input[fileTypeR1 == "Aligned"| (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob)/ class_input[fileTypeR1 == "Aligned"| (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob) )
+  var_i = var(log( (1-class_input[fileTypeR1 == "Aligned"| (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob)/ class_input[fileTypeR1 == "Aligned"| (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob) )
+  all_per_read_probs = class_input[(fileTypeR1 == "Aligned") | (fileTypeR1 == "Chimeric" & (chrR1A == chrR1B) & (gene_strandR1A==gene_strandR1B) &  ((gene_strandR1A== "+" & juncPosR1A < juncPosR1B) | (gene_strandR1A== "-" & juncPosR1A > juncPosR1B)) & abs(juncPosR1A- juncPosR1B)<1000000 )]$per_read_prob
   
   num_per_read_probs = length(all_per_read_probs)
   for (num_reads in 1:15){
@@ -492,6 +580,10 @@ class_input[, length_adj_AS_R1B:= aScoreR1B / (MR1B + SR1B), by = 1:nrow(class_i
 class_input[fileTypeR1 == "Aligned", nmmR1:= nmmR1A]
 class_input[fileTypeR1 == "Chimeric", nmmR1:= nmmR1A + nmmR1B]
 ###########################################################################################
+
+class_input[NHR1A>1,multimapping:=1]
+class_input[NHR1A==1,multimapping:=0]
+class_input[,frac_multimapping:=mean(multimapping),by=refName_newR1]
 
 #### obtain junction overlap #########
 class_input[, overlap_R1 := min(MR1A,MR1B), by = 1:nrow(class_input)]
@@ -753,18 +845,19 @@ toc()
 #####################################
 
 
-col_names_to_keep_in_junc_pred_file = c("refName_newR1","frac_genomic_reads","numReads","njunc_binR1B","njunc_binR1A","median_overlap_R1","threeprime_partner_number_R1","fiveprime_partner_number_R1","is.STAR_Chim","is.STAR_SJ","is.STAR_Fusion","is.True_R1","geneR1A_expression_stranded","geneR1A_expression_unstranded","geneR1B_expression_stranded","geneR1B_expression_unstranded","geneR1A_RPKM_stranded","geneR1A_RPKM_unstranded","geneR1B_RPKM_stranded","geneR1B_RPKM_unstranded","geneR1B_ensembl","geneR1A_ensembl","geneR1B_uniq","geneR1A_uniq","intron_motif","is.TRUE_fusion","p_predicted_glmnet_constrained","p_predicted_glmnet_corrected_constrained","p_predicted_glmnet_twostep_constrained","junc_cdf_glmnet_constrained","junc_cdf_glmnet_corrected_constrained","junc_cdf_glmnet_twostep","ave_max_junc_14mer","ave_min_junc_14mer","frac_anomaly","ave_AT_run_R1","ave_GC_run_R1","ave_max_run_R1","ave_AT_run_R2","ave_GC_run_R2","ave_entropyR1","ave_entropyR2","min_entropyR1","min_entropyR2","ave_max_run_R2","sd_overlap","p_val_median_overlap_R1","chrR1A","chrR1B","juncPosR1A","juncPosR1B","gene_strandR1A","gene_strandR1B","fileTypeR1","read_strandR1A","read_strandR1B")
-junction_prediction = unique(class_input[, colnames(class_input)%in%col_names_to_keep_in_junc_pred_file, with = FALSE])
-junction_prediction = junction_prediction[!(duplicated(refName_newR1))]
+
+col_names_to_keep_in_junc_pred_file = c("refName_newR1","frac_genomic_reads","frac_multimapping","numReads","njunc_binR1B","njunc_binR1A","median_overlap_R1","threeprime_partner_number_R1","fiveprime_partner_number_R1","is.STAR_Chim","is.STAR_SJ","is.STAR_Fusion","is.True_R1","geneR1A_expression_stranded","geneR1A_expression_unstranded","geneR1B_expression_stranded","geneR1B_expression_unstranded","geneR1A_RPKM_stranded","geneR1A_RPKM_unstranded","geneR1B_RPKM_stranded","geneR1B_RPKM_unstranded","geneR1B_ensembl","geneR1A_ensembl","geneR1B_uniq","geneR1A_uniq","intron_motif","is.TRUE_fusion","p_predicted_glmnet_constrained","p_predicted_glmnet_corrected_constrained","p_predicted_glmnet_twostep_constrained","junc_cdf_glmnet_constrained","junc_cdf_glmnet_corrected_constrained","junc_cdf_glmnet_twostep","ave_max_junc_14mer","ave_min_junc_14mer","frac_anomaly","ave_AT_run_R1","ave_GC_run_R1","ave_max_run_R1","ave_AT_run_R2","ave_GC_run_R2","ave_entropyR1","ave_entropyR2","min_entropyR1","min_entropyR2","ave_max_run_R2","sd_overlap","p_val_median_overlap_R1","chrR1A","chrR1B","juncPosR1A","juncPosR1B","gene_strandR1A","gene_strandR1B","fileTypeR1","read_strandR1A","read_strandR1B")
+GLM_output = unique(class_input[, colnames(class_input)%in%col_names_to_keep_in_junc_pred_file, with = FALSE])
+GLM_output = GLM_output[!(duplicated(refName_newR1))]
 
 ##############################################################################################################
 #### compute emp.p values based upon junc_cdf and using junctions with >10% genomic reads ####################
-null_dist = junction_prediction[is.na(is.STAR_Chim) & frac_genomic_reads > 0.1]$junc_cdf_glmnet_constrained
-junction_prediction[, emp.p_glmnet_constrained:=length(which(null_dist>junc_cdf_glmnet_constrained))/length(null_dist), by = junc_cdf_glmnet_constrained]
+null_dist = GLM_output[is.na(is.STAR_Chim) & frac_genomic_reads > 0.1]$junc_cdf_glmnet_constrained
+GLM_output[, emp.p_glmnet_constrained:=length(which(null_dist>junc_cdf_glmnet_constrained))/length(null_dist), by = junc_cdf_glmnet_constrained]
 
 if (is.SE == 0){
-  null_dist = junction_prediction[is.na(is.STAR_Chim) & frac_genomic_reads>0.1]$junc_cdf_glmnet_corrected_constrained
-  junction_prediction[, emp.p_glmnet_corrected_constrained:=length(which(null_dist>junc_cdf_glmnet_corrected_constrained))/length(null_dist), by = junc_cdf_glmnet_corrected_constrained]
+  null_dist = GLM_output[is.na(is.STAR_Chim) & frac_genomic_reads>0.1]$junc_cdf_glmnet_corrected_constrained
+  GLM_output[, emp.p_glmnet_corrected_constrained:=length(which(null_dist>junc_cdf_glmnet_corrected_constrained))/length(null_dist), by = junc_cdf_glmnet_corrected_constrained]
 }
 ##############################################################################################################
 ##############################################################################################################
@@ -783,7 +876,7 @@ class_input_extract[, max_junc_level_overlap:=max(overlap), by = refName_newR1] 
 class_input_extract = class_input_extract[overlap==max_junc_level_overlap]
 class_input_extract[, c("overlap","max_junc_level_overlap"):= NULL]
 class_input_extract = class_input_extract[!duplicated(refName_newR1)]
-junction_prediction = merge(junction_prediction, class_input_extract, by.x = "refName_newR1", by.y = "refName_newR1", all.x = TRUE, all.y = FALSE)
+GLM_output = merge(GLM_output, class_input_extract, by.x = "refName_newR1", by.y = "refName_newR1", all.x = TRUE, all.y = FALSE)
 toc()
 ##########################################################
 ##########################################################
@@ -791,11 +884,17 @@ toc()
 
 ## removing redundant columns for GLM script
 class_input[,c("cur_weight","train_class","sum_log_per_read_prob","log_per_read_prob","junc_cdf1_glmnet_twostep","refName_readStrandR1","refName_readStrandR2","gene_strandR1A_new","gene_strandR1B_new"):=NULL]
-junction_prediction[, c("cigarR1A","cigarR1B"):= NULL]
+GLM_output[, c("cigarR1A","cigarR1B"):= NULL]
+
+GLM_output = postprocessing_model(GLM_output,class_input,is.SE,is.10X)
+
+write.table(GLM_output, paste(directory,"GLM_output.txt", sep = ""), row.names = FALSE, quote = FALSE, sep = "\t")
+write.table(class_input, paste(directory,"class_input.tsv", sep = ""), row.names = FALSE, quote = FALSE, sep = "\t")
 
 
 # use the following function to call final splice junctions 
-sicilian_splicing_called_junctions = postprocessing(junction_prediction,class_input,is.10X,is.SE)
+sicilian_splicing_called_junctions = postprocessing_hardthreshold(GLM_output,class_input,is.10X,is.SE)
+
 
 # use the following function to find inserted/missing domains for each called junction (this function will be run only when ucsc domain annotation files have been provided)
 if ((length(args)==6) | (length(args)==8)){
@@ -804,8 +903,6 @@ if ((length(args)==6) | (length(args)==8)){
 }
 
 
-write.table(junction_prediction, paste(directory,"GLM_output.txt", sep = ""), row.names = FALSE, quote = FALSE, sep = "\t")
-write.table(class_input, paste(directory,"class_input.tsv", sep = ""), row.names = FALSE, quote = FALSE, sep = "\t")
 write.table(sicilian_splicing_called_junctions, paste(directory,"sicilian_called_splice_juncs.tsv", sep = ""), row.names = FALSE, quote = FALSE, sep = "\t")
 
 # use this for annotating the exon boudnaries in the called junctions (this function will be run only when exon and splice annotation pickle files have been provided)

@@ -79,10 +79,10 @@ def class_input(out_path, name, gtf_file, annotator_file, tenX, single, stranded
   """Run script to create class input file"""
   command = "python3 scripts/light_class_input.py --outpath {}{}/ --gtf {} --annotator {} --bams ".format(out_path, name, gtf_file,annotator_file) 
   if single:
-    command += "{}{}/2Aligned.out.bam ".format(out_path,name)
+    command += "{}{}/2Aligned.sortedByCoord.out.bam ".format(out_path,name)
   else:
-    command += "{}{}/1Aligned.out.bam ".format(out_path,name)
-    command += "{}{}/2Aligned.out.bam ".format(out_path,name)
+    command += "{}{}/1Aligned.sortedByCoord.out.bam ".format(out_path,name)
+    command += "{}{}/2Aligned.sortedByCoord.out.bam ".format(out_path,name)
   if tenX:
     command += "--UMI_bar "
 #  if stranded_library:
@@ -113,7 +113,7 @@ def STAR_map(out_path, data_path, name, r_ends, gzip, single, gtf_file, tenX, st
     command += "--twopassMode Basic "
     command += "--alignIntronMax 1000000 "
     command += "--outFileNamePrefix {}{}/{} ".format(out_path, name, i + 1)
-    command += "--outSAMtype BAM Unsorted "
+    command += "--outSAMtype BAM SortedByCoordinate "
     command += "--outSAMattributes All "
     command += "--chimOutType WithinBAM SoftClip Junctions "
     command += "--chimJunctionOverhangMin 10 "

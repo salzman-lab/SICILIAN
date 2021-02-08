@@ -44,16 +44,25 @@ git clone https://github.com/salzmanlab/SICILIAN.git
   - GenomicAlignments
    
   
-### Building annotator and index files
-SICLIAN uses STAR as the aligner and therefore STAR index files need to be input to SICILIAN. STAR index files can be built using the following command:
+###  Annotator and index files needed for running SICILIAN
+SICLIAN uses STAR as the aligner and therefore STAR index files need to be input to SICILIAN. SICILIAN also needs annotator pickle files for pulling gene names and adding them to the detected junction based on their coordinates. There are two options for the index and annotator files required for running SICILIAN: 1- download pre-built ready-to-use index files or 2- build STAR index files and annotator pickle files using the following instructions. 
+
+#### Downloading ready-to-use index files
+All needed STAR index and annotator pickle files needed for running SICILIAN can be downloaded using the following links for four different genomes (human, mouse, mouse lemur, COVID19). With these files, there is no need for building any other file manually for running SICILIAN. Each link points to a folder that should be untarred after downloading. The folder contains a subfolder for STAR index files (built based on STAR 2.7.5) and five other folders containing the GTF and pickle files needed for annotating the splice junctions called by SICILIAN: 
+- `Human`: https://drive.google.com/file/d/1cGfn7MZbGewBJp6ZGGW_IOW3nWEAHOPz/view?usp=sharing
+- `Mouse`: https://drive.google.com/file/d/16zaKBHy3-xe_LXyOl0hF6NG7q798p1BZ/view?usp=sharing
+- `Mouse lemur`: https://drive.google.com/file/d/1JIvWawo4PYLz-I2m--a0Ukyh9Wqw89VR/view?usp=sharing
+- `COVID19`: https://drive.google.com/file/d/1w0EuKRLYOc1NBpS4c-TfdQEdRN_d1lwU/view?usp=sharing
+#### Building index and annotator files
+The other option is to build these files manually by using the following instructions. STAR index files can be built using the following command:
 ```
 STAR --runThreadN 4 --runMode genomeGenerate --genomeDir Genome_data/star --genomeFastaFiles fasta_file.fa --sjdbGTFfile gtf_file.gtf
 ```
-SICILIAN also needs annotator pickle files for pulling gene names and adding them to the detected junction based on their coordinates. Annotator pickle file need to be made once for an annotation GTF file using `create_annotator.py` script in the SICILIAN directory. The annotator pickle file can be built with the following command:
+The annotator pickle file for a GTF file needs to be made only once by the `create_annotator.py` script in the SICILIAN codes directory, using the following command:
 ```
 python3 create_annotator.py -g gtf_file.gtf -a annotation_name
 ```
-`annotation_name` can be set to any arbitrary name but we recommended that it contains the name and version of the annotation (i.e., `hg38_gencode_v33`).    
+`annotation_name` can be set to any arbitrary name but we recommend it contains the name and the version of the annotation (i.e., `hg38_gencode_v33`).    
 After running the above command,`create_annotator.py` will create 3 different pickle files: `annotation_name.pkl`, `annotation_name_exon_bounds.pkl`, and `annotation_name_splices.pkl`. 
 - `annotation_name.pkl`: is a required input for SICILIAN and is used to add gene names to junction ids
 - `annotation_name_exon_bounds.pkl`: is an optional input for SICILIAN and is used to determine whether or not the splice sites in a junction are annotated exon boundaries

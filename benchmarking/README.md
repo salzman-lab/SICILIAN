@@ -6,3 +6,4 @@
 
 `count_tables.py`: Outputs tables of the number of annotated and unannotated junctions passing each criteria in each individual.
 
+`figure_1E.R`: Generates the ROC curves in Figure 1E based on the simulated benchmarking datasets. It takes as inputs the benchmarking data that are in `bechmarking_files` folder

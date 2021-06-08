@@ -5,11 +5,11 @@
 ############ Input arguments ###########################
 OUT_DIR="/oak/stanford/groups/horence/Roozbeh/single_cell_project/output"   #SICILIAN output folders for  all samples in a dataset should be in ${OUT_DIR}/${RUN_NAME}#
 RUN_NAME="HLCA_171205_tumor_10X"
-GTF_FILE="/oak/stanford/groups/horence/circularRNApipeline_Cluster/index/grch38_known_genes.gtf" # full path to the gtf file
-EXON_PICKLE_FILE="/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/STAR_wrapper/annotators/hg38_refseq_exon_bounds.pkl"  # full path to annotated exons pickle file
-SPLICE_PICKLE_FILE="/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/STAR_wrapper/annotators/hg38_refseq_splices.pkl"  # full pth to the annotated splice junctions pickle file
+GTF_FILE="/oak/stanford/groups/horence/circularRNApipeline_Cluster/index/grch38_known_genes.gtf"
+EXON_PICKLE_FILE="/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/STAR_wrapper/annotators/hg38_refseq_exon_bounds.pkl"
+SPLICE_PICKLE_FILE="/oak/stanford/groups/horence/Roozbeh/single_cell_project/scripts/STAR_wrapper/annotators/hg38_refseq_splices.pkl"
 DATA_FORMAT="10x"  # scRNA-Seq data format, should be either 10x or SS2
-QUEUE="owners,normal"   # the queue for submitting jobs
+QUEUE="owners,quake"   # the queue for submitting jobs
 ########################################################
 
 ######## the three steps required for SICILIAN postprocessing #########

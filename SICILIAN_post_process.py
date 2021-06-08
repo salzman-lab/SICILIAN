@@ -32,9 +32,9 @@ def sbatch_file(file_name,out_path, name, job_name, time, mem, command, queue, d
   job_file.close()
 
 
-def consolidate(out_path, run_name, data_format, queue, dep = ""):
+def consolidate(out_path, run_name, data_format, exon_pickle_file, splice_pickle_file, queue, dep = ""):
   "Run the consolidate_GLM_output_files.R script to consolidated all GLM output files within an output directory into a single file"
-  command = "Rscript scripts/consolidate_GLM_output_files.R {} {} ".format(out_path, run_name)
+  command = "Rscript scripts/consolidate_GLM_output_files.R {} {} {} {} ".format(out_path, run_name, exon_pickle_file, splice_pickle_file)
   if data_format == "10x":
     command += " 1 "
   else:
@@ -48,9 +48,14 @@ def process(out_path, run_name, gtf_file, exon_pickle_file, splice_pickle_file, 
   sbatch_file("run_process.sh", out_path, run_name,"process_{}".format(run_name), "48:00:00", "350Gb", command, queue, dep=dep)  # used 200Gb for CML 80Gb for others and 300 for 10x blood3
   return submit_job("run_process.sh")
 
-def postprocess(out_path, run_name, queue, dep = ""):
+def postprocess(out_path, run_name, data_format, queue, dep = ""):
   "Run the consolidate_GLM_output_files.R script to consolidated all GLM output files within an output directory into a single file"
   command = "Rscript scripts/post_processing.R {} {} ".format(out_path, run_name)
+  if data_format == "10x":
+    command += " 1 "
+  else:
+    command += " 0 "
+
   sbatch_file("run_postprocess.sh", out_path, run_name,"postprocess_{}".format(run_name), "48:00:00", "200Gb", command, queue, dep=dep)  # used 200Gb for CML 80Gb for others and 300 for 10x blood3
   return submit_job("run_postprocess.sh")
 
@@ -106,7 +111,9 @@ def main():
   run_postprocess = args.postprocess_step
 ########################################################
 
- 
+  if data_format != "10x":
+    run_process = False
+
   out_path = out_dir + "/{}/".format(run_name) 
 
   jobs = []
@@ -116,7 +123,7 @@ def main():
     os.makedirs("{}postprocess_log_files".format(out_path))
 
   if run_consolidate:
-    consolidate_jobid = consolidate(out_path, run_name, data_format, queue)
+    consolidate_jobid = consolidate(out_path, run_name, data_format, exon_pickle_file, splice_pickle_file, queue)
     jobs.append("consolidate_{}.{}".format(run_name, consolidate_jobid))
     job_nums.append(consolidate_jobid)
   else:
@@ -128,7 +135,7 @@ def main():
   else:
     process_jobid = ""
   if run_postprocess:
-    postprocess_jobid = postprocess(out_path, run_name, queue, dep = ":".join(job_nums))
+    postprocess_jobid = postprocess(out_path, run_name, data_format, queue, dep = ":".join(job_nums))
     jobs.append("postprocess_{}.{}".format(run_name, postprocess_jobid))
     job_nums.append(postprocess_jobid)
   else:

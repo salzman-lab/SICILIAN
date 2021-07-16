@@ -889,8 +889,8 @@ GLM_output[, c("cigarR1A","cigarR1B"):= NULL]
 GLM_output = postprocessing_model(GLM_output,class_input,is.SE,is.10X)
 
 write.table(GLM_output, paste(directory,"GLM_output.txt", sep = ""), row.names = FALSE, quote = FALSE, sep = "\t")
-write.table(class_input, paste(directory,"class_input.tsv", sep = ""), row.names = FALSE, quote = FALSE, sep = "\t")
-
+write.table(class_input, paste(directory,"class_input_tmp.tsv", sep = ""), row.names = FALSE, quote = FALSE, sep = "\t")
+system( paste("mv ",directory,"class_input_tmp.tsv ",directory,"class_input.tsv ",sep=""))
 
 # use the following function to call final splice junctions 
 sicilian_splicing_called_junctions = postprocessing_hardthreshold(GLM_output,class_input,is.10X,is.SE)

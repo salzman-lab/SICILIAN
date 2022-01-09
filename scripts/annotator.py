@@ -6,6 +6,8 @@ def get_gene_id(row):
     return row["attribute"].split("gene_name")[-1].split('"')[1]
   elif ";gene=" in row["attribute"]:
     return row["attribute"].split(";gene=")[-1].split(";")[0]
+  if "gene_id" in row["attribute"]:
+    return row["attribute"].split("gene_id")[-1].split('"')[1]
 
 def round_down(num, divisor): 
     return num - (num%divisor)
@@ -30,14 +32,10 @@ class Annotator:
     self.get_gtf_dict()
 
   def get_gtf_dict(self):
-    print("here")
-  
     # load in gtf
     gtf_df = pd.read_csv(self.gtf_file,sep="\t",names=["seqname","source","feature","start","end","score","strand","frame","attribute"],comment="#")
-    print(gtf_df.head()) 
     # make gene id column
     gtf_df["gene_id"] = gtf_df.apply(get_gene_id, axis=1)
-    print(gtf_df.head())
     
     # figure out how long to make each chromosome entry
     seqname_len_dict = {}
@@ -57,8 +55,6 @@ class Annotator:
             if gene_id is not None:
               gene_df = seqname_df[seqname_df["gene_id"] == gene_id]
               if len(gene_df["strand"].unique()) == 1:
-  #              print("gene_df['strand'].unique(): {}".format(gene_df['strand'].unique()))
-  #              print("gene_df['strand'].unique()[0]: {}".format(gene_df["strand"].unique()[0]))
                 strand = gene_df["strand"].unique()[0]
               else:
                 strand = self.unknown_strand

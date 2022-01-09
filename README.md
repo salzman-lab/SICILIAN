@@ -58,15 +58,15 @@ The other option is to build these files manually by using the following instruc
 ```
 STAR --runThreadN 4 --runMode genomeGenerate --genomeDir Genome_data/star --genomeFastaFiles fasta_file.fa --sjdbGTFfile gtf_file.gtf
 ```
-The annotator pickle file for a GTF file needs to be made only once by the `create_annotator.py` script in the SICILIAN codes directory, using the following command:
+The annotator pickle file for a GTF file needs to be made only once by the `create_annotator.py` script in the SICILIAN scripts directory, using the following command:
 ```
 python3 create_annotator.py -g gtf_file.gtf -a annotation_name
 ```
 `annotation_name` can be set to any arbitrary name but we recommend it contains the name and the version of the annotation (i.e., `hg38_gencode_v33`).    
-After running the above command,`create_annotator.py` will create 3 different pickle files: `annotation_name.pkl`, `annotation_name_exon_bounds.pkl`, and `annotation_name_splices.pkl`. 
+After running the above command,`create_annotator.py` will create 3 different pickle files in the current working directory (determined by `os.getcwd()` in python): `annotation_name.pkl`, `annotation_name_exon_bounds.pkl`, and `annotation_name_splices.pkl`. 
 - `annotation_name.pkl`: is a required input for SICILIAN and is used to add gene names to junction ids
-- `annotation_name_exon_bounds.pkl`: is an optional input for SICILIAN and is used to determine whether or not the splice sites in a junction are annotated exon boundaries
-- `annotation_name_splices.pkl`: is an optional input for SICILIAN and is used to determine whether or not the splice site is annotated in the annotation file
+- `annotation_name_exon_bounds.pkl`: is an optional input for SICILIAN and is used to determine whether or not each splice site (5' and 3') of a splice junction is an annotated exon boundary
+- `annotation_name_splices.pkl`: is an optional input for SICILIAN and is used to determine whether or not the splice junction is annotated in the annotation gtf file
 ### Input parameters for SICILIAN:
 Update the input parameters in `SICILIAN.py` script with information about your sample, genome assembly and annotations, and STAR alignment.
 * `data_path`: specifies path to the directory that contains the fastq files for the input RNA-Seq data.

@@ -47,8 +47,8 @@ git clone https://github.com/salzmanlab/SICILIAN.git
 ###  Annotator and index files needed for running SICILIAN
 SICLIAN uses STAR as the aligner and therefore it needs STAR index files. SICILIAN also needs annotator pickle files for pulling gene names and adding them to the detected junctions. There are two options for the index and annotator files required for running SICILIAN: 1- download pre-built ready-to-use files or 2- build these files using the instructions given below. 
 
-#### Download ready-to-use index files
-All needed STAR index and annotator pickle files needed for running SICILIAN can be downloaded using the following links for four different genomes (human, mouse, mouse lemur, COVID19). With these files, there is no need for building any other file manually for running SICILIAN. Each link points to a folder that should be untarred after downloading. The folder contains a subfolder for STAR index files (built based on STAR 2.7.5) and five other folders containing the GTF and pickle files needed for annotating the splice junctions called by SICILIAN: 
+#### Download ready-to-use index and annotator files
+All STAR index and annotator pickle files needed for running SICILIAN can be downloaded using the following links for `human`, `mouse`, `mouse lemur`, and `COVID-19` genomes. All you need to run SICILIAN is to download these files. Each link points to a folder which should be untarred after downloading. The folder contains a subfolder for STAR index files (built based on STAR 2.7.5) and five other folders containing the GTF and the annotator pickle files needed for annotating the splice junctions called by SICILIAN: 
 - `Human`: https://drive.google.com/file/d/1cGfn7MZbGewBJp6ZGGW_IOW3nWEAHOPz/view?usp=sharing
 - `Mouse`: https://drive.google.com/file/d/16zaKBHy3-xe_LXyOl0hF6NG7q798p1BZ/view?usp=sharing
 - `Mouse lemur`: https://drive.google.com/file/d/1JIvWawo4PYLz-I2m--a0Ukyh9Wqw89VR/view?usp=sharing

@@ -90,9 +90,9 @@ he STAR index files
 ### Choosing STAR parameters
 STAR alignment parameters can be adjusted in the `STAR_map` function in `SICILIAN.py`. By default, SICILIAN runs STAR with default parameters. 
 
-### Choosing which scripts to run
-These parameters let you decide which steps of the SICILIAN pipeline you want to run (for example, if you have run STAR alignment once on a data set but SICILIAN has failed to produce output files, you do not need to run STAR alignment once again and can just set `run_map` to `False` to skip the alignment step when rerunning SICILIAN):
-* `run_whitelist`: Set equal to `True` if you want to run UMI-tools whitelist script to extract cell barcodes and identify the most likely true cell barcodes (will be run only for 10X)
+### Toggles for choosing which steps to run
+These parameters let you determine which steps of the SICILIAN pipeline will be run (for example, if you have already run STAR alignment for a sample but SICILIAN has failed at one of the subsequent steps, you can skip over the STAR alignment step by setting `run_map` to `False`) when rerunning SICILIAN:
+* `run_whitelist`: Set equal to `True` if your input data is *10X* want to run UMI-tools whitelist script to extract cell barcodes and identify the most likely true cell barcodes (will be run only for 10X)
 * `run_extract`: Set equal to `True` if you want to run UMI-tools extract script which removes UMIs from fastq reads and append them to read name (will be ron only for 10x)
 * `run_map`: Set equal to `True` if you want to run the STAR alignment, and `False` otherwise
 * `run_class`: Set equal to `True` if you want to run the class input job, and `False` otherwise

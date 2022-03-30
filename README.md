@@ -10,13 +10,13 @@ Dehghannasiri*, R., Olivieri*, J. E., Damljanovic, A., and Salzman, J. "Specific
 Please contact Roozbeh Dehghannasiri (rdehghan@stanford.edu) or Julia Eve Olivieri (jolivier@stanford.edu).
 
 ## How to run SICILIAN
-There are three options for running SICILIAN
+There are three options for running SICILIAN. All three implementations can be used for any scRNA-Seq (and bulk RNA) datasets but each one is better suited for specific sequencing technologies and dataset size):
 1. Installing using the scripts in this repository and running SICILIAN after installing required libraries (recommended for SmartSeq2 and datasets with large number of samples). 
 2. Using the `Nextflow`/`Docker`-based pipeline from (https://github.com/czbiohub/nf-sicilian) with minimal installation (recommended for 10x datasets)
-3. Using the cloud-based online tool on the Cancer Genomics Cloud (CGC) platform (https://www.cancergenomicscloud.org/) (recommended for running on the datasets available on CGC i.e., TCGA, GTEx, ...).
+3. Using the cloud-based online tool on the Cancer Genomics Cloud (CGC) platform (https://www.cancergenomicscloud.org/) (recommended for running on the datasets available on CGC i.e., TCGA, CCLE, ...).
 
 ## Online cloud-based tool for SICILIAN
-The cloud-based computational workflow for SICILIAN has been implemented on the Seven Bridges Cancer Genomics Cloud platform sponsored by the National Cancer Institute. The workflow is fully dockerized and has a user-friendly interface, which facilitates running SICILIAN even for users with little bioinformatics expertise. User only needs to upload his/her own RNA-Seq fastq files or use RNA-Seq files publicly-available on CGC (i.e., TCGA, CCLE, TARGET, ...) to run SICILIAN and selects correct annotation and index files to run SICILIAN. The online tool can be accessed via: https://cgc.sbgenomics.com/public/apps#jordanski.milos/deepest-fusion/sicilian/
+The cloud-based online tool for SICILIAN is available on the [Seven Bridges Cancer Genomics Cloud platform](https://www.cancergenomicscloud.org/) sponsored by the National Cancer Institute. The workflow is fully dockerized and has a user-friendly interface, making it easy to run particularly for users with little bioinformatics expertise. Users only need to upload their fastq files or use the datasets publicly-available on CGC (i.e., TCGA, CCLE, TARGET, ...) and select correct annotation and index files to run SICILIAN. The online tool can be accessed via: https://cgc.sbgenomics.com/public/apps#jordanski.milos/deepest-fusion/sicilian/
 
 ## Running SICILIAN scripts on a local cluster
 

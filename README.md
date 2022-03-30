@@ -1,7 +1,7 @@
 # SICILIAN
 ![Image of SICILIAN](https://github.com/salzmanlab/SICILIAN/blob/master/SICILIAN.png)
 
-SICILIAN is a statistical method for identifying RNA splice junctions using alignments reported from a spliced aligner (currently based on STAR).
+SICILIAN is a statistical method for identifying high confidence RNA splice junctions from a spliced aligner (currently based on STAR).
 
 ## Citation
 Dehghannasiri*, R., Olivieri*, J. E., Damljanovic, A., and Salzman, J. "Specific splice junction detection in single cells with SICILIAN", Genome Biology, August 2021. (https://genomebiology.biomedcentral.com/articles/10.1186/s13059-021-02434-8)
@@ -10,9 +10,10 @@ Dehghannasiri*, R., Olivieri*, J. E., Damljanovic, A., and Salzman, J. "Specific
 Please contact Roozbeh Dehghannasiri (rdehghan@stanford.edu) or Julia Eve Olivieri (jolivier@stanford.edu).
 
 ## How to run SICILIAN
-There are two options for running SICILIAN
-1. using the ready-to-run cloud-based online tool with CWL implementation without the need for preinstallations on the cancer genomics cloud platform.
-2. Downloading SICILIAN scripts to a local high performance computing (HPC) cluster and running SICILIAN after installing required libraries. 
+There are three options for running SICILIAN
+1. Installing using the scripts in this repository and running SICILIAN after installing required libraries. 
+2. Using the `Nextflow`/`Docker`-based pipeline from (https://github.com/czbiohub/nf-sicilian) with minimal installation
+3. Using the cloud-based online tool on the Cancer Genomics Cloud (CGC) platform (https://www.cancergenomicscloud.org/).
 
 ## Online cloud-based tool for SICILIAN
 The cloud-based computational workflow for SICILIAN has been implemented on the Seven Bridges Cancer Genomics Cloud platform sponsored by the National Cancer Institute. The workflow is fully dockerized and has a user-friendly interface, which facilitates running SICILIAN even for users with little bioinformatics expertise. User only needs to upload his/her own RNA-Seq fastq files or use RNA-Seq files publicly-available on CGC (i.e., TCGA, CCLE, TARGET, ...) to run SICILIAN and selects correct annotation and index files to run SICILIAN. The online tool can be accessed via: https://cgc.sbgenomics.com/public/apps#jordanski.milos/deepest-fusion/sicilian/

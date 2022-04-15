@@ -49,11 +49,22 @@ git clone https://github.com/salzmanlab/SICILIAN.git
 SICLIAN uses STAR as the aligner and therefore it needs STAR index files. SICILIAN also needs annotator pickle files for pulling gene names and adding them to the detected junctions. There are two options for the index and annotator files required for running SICILIAN: 1- download pre-built ready-to-use files or 2- build these files using the instructions given below. 
 
 #### Download ready-to-use index and annotator files
-All STAR index and annotator pickle files needed for running SICILIAN can be downloaded using the following links for `human`, `mouse`, `mouse lemur`, and `COVID-19` genomes. All you need to run SICILIAN is to download these files. Each link points to a folder which should be untarred after downloading. The folder contains a subfolder for STAR index files (built based on STAR 2.7.5) and five other folders containing the GTF and the annotator pickle files needed for annotating the splice junctions called by SICILIAN: 
-- `Human`: https://drive.google.com/file/d/1cGfn7MZbGewBJp6ZGGW_IOW3nWEAHOPz/view?usp=sharing
-- `Mouse`: https://drive.google.com/file/d/16zaKBHy3-xe_LXyOl0hF6NG7q798p1BZ/view?usp=sharing
-- `Mouse lemur`: https://drive.google.com/file/d/1JIvWawo4PYLz-I2m--a0Ukyh9Wqw89VR/view?usp=sharing
-- `COVID19`: https://drive.google.com/file/d/1w0EuKRLYOc1NBpS4c-TfdQEdRN_d1lwU/view?usp=sharing
+All STAR index and annotator pickle files needed for running SICILIAN can be downloaded using the following links for `human`, `mouse`, `mouse lemur`, and `COVID-19` genomes. All you need to run SICILIAN is to download these files. Each file can be downloaded directly from Google Drive or Zenodo using the following links. The folder which should be untarred after downloading contains a subfolder for STAR index files (built based on STAR 2.7.5) and five other folders containing the GTF and the annotator pickle files needed for annotating the splice junctions called by SICILIAN: 
+- **Human hg38**: 
+  - `Google Drive`: https://drive.google.com/file/d/1cGfn7MZbGewBJp6ZGGW_IOW3nWEAHOPz/view?usp=sharing
+  - `Zenodo`: https://doi.org/10.5281/zenodo.6462314
+
+- **Mouse mm10**:https://doi.org/10.5281/zenodo.6462332
+  - `Google Drive`: https://drive.google.com/file/d/16zaKBHy3-xe_LXyOl0hF6NG7q798p1BZ/view?usp=sharing
+  - `Zenodo`: https://doi.org/10.5281/zenodo.6462332
+
+- **Mouse Lemur Mmur3**: 
+  - `Google Drive`: https://drive.google.com/file/d/1JIvWawo4PYLz-I2m--a0Ukyh9Wqw89VR/view?usp=sharing
+  - `Zenodo`: https://doi.org/10.5281/zenodo.6462338
+
+- **SARS-COV-2**:
+  - `Google Drive`: https://drive.google.com/file/d/1w0EuKRLYOc1NBpS4c-TfdQEdRN_d1lwU/view?usp=sharing
+  - `Zenodo`: https://doi.org/10.5281/zenodo.6459610
 #### Build index and annotator files
 The other option is to build these files manually by using the following instructions. STAR index files can be built using the following command:
 ```

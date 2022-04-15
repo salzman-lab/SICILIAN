@@ -16,7 +16,7 @@ There are three options for running SICILIAN. All three implementations can be u
 3. Using the cloud-based online tool on the Cancer Genomics Cloud (CGC) platform (https://www.cancergenomicscloud.org/) (recommended for running on the datasets available on CGC i.e., TCGA, CCLE, ...).
 
 ## Online cloud-based tool for SICILIAN
-The cloud-based online tool for SICILIAN is available on the [Seven Bridges Cancer Genomics Cloud platform](https://www.cancergenomicscloud.org/) sponsored by the National Cancer Institute. The workflow is fully dockerized and has a user-friendly interface, making it easy to run particularly for users with little bioinformatics expertise. Users only need to upload their fastq files or use the datasets publicly-available on CGC (i.e., TCGA, CCLE, TARGET, ...) and select correct annotation and index files to run SICILIAN. The online tool can be accessed via: https://cgc.sbgenomics.com/public/apps#jordanski.milos/deepest-fusion/sicilian/
+The cloud-based online tool for SICILIAN is available on the [Seven Bridges Cancer Genomics Cloud platform](https://www.cancergenomicscloud.org/) sponsored by the National Cancer Institute. The workflow is fully dockerized and has a user-friendly interface, making it easy to run particularly for users with little bioinformatics expertise. Users only need to upload their fastq files or use the datasets publicly-available on CGC (i.e., TCGA, CCLE, TARGET, ...) and select correct annotation and index files to run SICILIAN. The online tool can be accessed via this [link](https://cgc.sbgenomics.com/public/apps#jordanski.milos/deepest-fusion/sicilian/).
 
 ## Running SICILIAN scripts on a local cluster
 
@@ -27,7 +27,7 @@ git clone https://github.com/salzmanlab/SICILIAN.git
 - Intall needed packages for `R` and `Python`
 - Build annotation pickle files and STAR index files for a genome assembly and annotation using `create_annotator.py` script
 - Set the input variables in `SICILIAN.py` which is the main script that submits all necessary jobs for running SICILIAN on input RNA-Seq data. 
-- For running SICILIAN on 10x scRNA-Seq data, it needs to first demultiplex 10x fastq file based on cell barcode and UMI information stored in R1. For 10x analysis, SICILIAN executes `whitelise` and `extract` commands from `UMI_tools` software (https://github.com/CGATOxford/UMI-tools). Therefore, `UMI_tools` should be preinstalled on the local cluster for running SICILIAN on 10x samples.  
+- For running SICILIAN on 10x scRNA-Seq data, it needs to first demultiplex 10x fastq file based on cell barcode and UMI information stored in R1. For 10x analysis, SICILIAN executes `whitelise` and `extract` commands from [UMI_tools](https://github.com/CGATOxford/UMI-tools) software . Therefore, `UMI_tools` should be preinstalled on the local cluster for running SICILIAN on 10x samples.  
 ### Software requirements 
 - SICILIAN has been developed using `Python 3.6.1`. The following python packages are needed to be installed (they can be installed using the `requirements.txt` file in the SICILIAN repository and command `pip3 install -r requirements.txt`):
   - argparse

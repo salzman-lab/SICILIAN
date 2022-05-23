@@ -4,34 +4,34 @@
 # load and install required packages for the script
 
 if (!require("data.table")) {
-  install.packages("data.table", dependencies = TRUE)
+  install.packages("data.table", dependencies = TRUE, repos = "http://cran.us.r-project.org")
   library(data.table)
 }
 if (!require("glmnet")) {
-  install.packages("glmnet", dependencies = TRUE)
+  install.packages("glmnet", dependencies = TRUE, repos = "http://cran.us.r-project.org")
   library(glmnet)
 }
 if (!require("tictoc")) {
-  install.packages("tictoc", dependencies = TRUE)
+  install.packages("tictoc", dependencies = TRUE, repos = "http://cran.us.r-project.org")
   library(tictoc)
 }
 if (!require("dplyr")) {
-  install.packages("dplyr", dependencies = TRUE)
+  install.packages("dplyr", dependencies = TRUE, repos = "http://cran.us.r-project.org")
   library(dplyr)
 }
 if (!require("stringr")) {
-  install.packages("stringr", dependencies = TRUE)
+  install.packages("stringr", dependencies = TRUE, repos = "http://cran.us.r-project.org")
   library(stringr)
 }
 
 if (!require("cutpointr")) {
-  install.packages("cutpointr", dependencies = TRUE)
+  install.packages("cutpointr", dependencies = TRUE, repos = "http://cran.us.r-project.org")
   library(stringr)
 }
 
 if (!require("GenomicAlignments")) {
   if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
+    install.packages("BiocManager", repos = "http://cran.us.r-project.org")
   BiocManager::install("GenomicAlignments")
   
   library(GenomicAlignments)

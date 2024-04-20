@@ -26,7 +26,7 @@ if (!require("stringr")) {
 
 if (!require("cutpointr")) {
   install.packages("cutpointr", dependencies = TRUE)
-  library(stringr)
+  library(cutpointr)
 }
 
 if (!require("GenomicAlignments")) {

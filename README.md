@@ -36,13 +36,14 @@ git clone https://github.com/salzmanlab/SICILIAN.git
   - pyarrow
   - pysam
 
-- SICILIAN has been developed with `R 3.6.1` and needs the following packages are needed to be installed in `R` (R scripts in SICILIAN automatically check to see if an R library is already installed and then install those that are needed. So no need for manual preinstallation!):
+- SICILIAN has been developed with `R 3.6.1` and requires the following packages to be installed in `R` (The R script in SICILIAN automatically checks if a package is already installed and will install any that are needed, so no manual preinstallation is needed!):
   - data.table
   - glmnet
   - tictoc
   - dplyr
   - stringr
   - GenomicAlignments
+  - cutpointr
    
   
 ###  Annotator and index files needed for running SICILIAN
@@ -76,15 +77,15 @@ python3 create_annotator.py -g gtf_file.gtf -a annotation_name
 ```
 `annotation_name` can be set to any arbitrary name but we recommend it contains the name and the version of the annotation (i.e., `hg38_gencode_v33`).    
 After running the above command,`create_annotator.py` will create 3 different pickle files in the current working directory (determined by `os.getcwd()` in python): `annotation_name.pkl`, `annotation_name_exon_bounds.pkl`, and `annotation_name_splices.pkl`. 
-- `annotation_name.pkl`: is a required input for SICILIAN and is used to add gene names to junction ids
+- `annotation_name.pkl`: is a required input for SICILIAN and is used to add gene names to junction IDs
 - `annotation_name_exon_bounds.pkl`: is an optional input for SICILIAN and is used to determine whether or not each splice site (5' and 3') of a splice junction is an annotated exon boundary
 - `annotation_name_splices.pkl`: is an optional input for SICILIAN and is used to determine whether or not the splice junction is annotated in the annotation gtf file
 ### Input parameters for SICILIAN:
 Update the input parameters in `SICILIAN.py` script with information about your sample, genome assembly and annotations, and STAR alignment.
-* `data_path`: specifies path to the directory that contains the fastq files for the input RNA-Seq data.
+* `data_path`: specifies the path to the directory that contains the fastq files for the input RNA-Seq data.
 * `names`: specifies the name of the fastq file for the input RNA-Seq data (without suffix)  
 * `r_ends`: list of unique endings for the file names of R1 and R2 fastq files. Example: `r_ends = ["_1.fastq.gz", "_2.fastq.gz"]`
-* `out_dir`: specifies path to the directory that will contain the folder specified by `run_name` for SICILIAN output files.
+* `out_dir`: specifies the path to the directory that will contain the folder specified by `run_name` for SICILIAN output files.
 * `run_name`: folder name for the SICILIAN output files.
 * `star_path`: the path to the STAR executable file
 * `star_ref_path`: the path to t:q
@@ -94,7 +95,7 @@ he STAR index files
 * `exon_pickle_file`: the path to the `annotation_name_exon_bounds.pkl` file (this is an OPTIONAL input)
 * `splice_pickle_file`: the path to the `annotation_name_splices.pkl` file (this is an OPTIONAL input)
 * `domain_file`: the path to the reference file for annotated protein domains downloaded from UCSC used for finding missing and inserted protein domains in the splice junction (this is an OPTIONAL input)    
-* `single`: set equal to `True` if the data is single-end, and `False` if it is paired-end. Note that currently if `single = True` it is assumed that the single read to be aligned is in the second fastq file (because of the tendancy of SICILIAN for droplet (10x) single-cell protocols in which `R1` contains the cell barcode and UMI information and R2 contains the actual cDNA information). This also causes the files to be demultiplexed to create a new fastq file before they're mapped.
+* `single`: set equal to `True` if the data is single-end, and `False` if it is paired-end. Note that currently if `single = True` it is assumed that the single read to be aligned is in the second fastq file (this aligns with the setup of SICILIAN for droplet (10x) single-cell protocols, where `R1` contains the cell barcode and UMI information, and R2 contains the actual cDNA information). This also causes the files to be demultiplexed to create a new fastq file before they're mapped.
 * `tenX`: set equal to `True` if the input RNA-Seq data is 10x and `False` otherwise.
 * `stranded_library`: set equal to `True` if input RNA-Seq data is based on a stranded library and `False` otherwise. (for stranded libraries such as 10x, `stranded_library` should be set to `True`). When `stranded_library` is set to `True`, strand orientations from the alignment bam file will be used as the strand orientation of the junction. For unstranded libraries, SICILIAN uses gene strand information from the GTF file as the read strand is ambiguous.  
 * `bc_pattern`: this parameter is needed only for 10x data and determines the barcode/UMI pattern in R1. For V3 chemistry in which UMI has 12 bps, `bc_pattern` should be set to `"C"*16 + "N"*12` and for 10x data based on V2 chemistry it should be set to `"C"*16 + "N"*10`. `bc_pattern` is needed for `UMI_tools` steps before STAR alignment on input 10x data.
